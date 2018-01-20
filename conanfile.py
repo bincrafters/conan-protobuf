@@ -9,7 +9,7 @@ class ProtobufConan(ConanFile):
     name = "protobuf"
     version = "3.5.1"
     url = "https://github.com/bincrafters/conan-protobuf"
-    description = "Conan.io recipes for Google Protocol Buffers"
+    description = "Conan.io recipe for Google Protocol Buffers"
 
     # Indicates License type of the packaged library
     license = "MIT"
@@ -24,8 +24,9 @@ class ProtobufConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "with_zlib": [True, False],
-               "build_tests": [True, False],}
-    default_options = "shared=False","with_zlib=False","build_tests=False"
+               "build_tests": [True, False],
+               "static_rt": [True, False],}
+    default_options = "shared=False","with_zlib=False","build_tests=False","static_rt=True",
     
     # Custom attributes for Bincrafters recipe conventions
     source_subfolder = "source_subfolder"
@@ -44,6 +45,7 @@ class ProtobufConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.definitions["protobuf_BUILD_TESTS"] = self.options.build_tests
+        cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = self.options.static_rt
         cmake.configure(build_folder=self.build_subfolder)
         cmake.build()
         if self.options.build_tests:

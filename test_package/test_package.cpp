@@ -5,6 +5,12 @@
 
 int main()
 {
-    std::cout << "Bincrafters\n";
-    return EXIT_SUCCESS;
+	std::cout << "Bincrafters\n";
+
+	tutorial::Person p;
+	p.set_name("Bincrafters");
+	p.set_email("bincrafters@github.com");
+
+	std::cout << p.SerializeAsString() << "\n";
+	return EXIT_SUCCESS;
 }

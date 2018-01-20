@@ -8,6 +8,7 @@ import os
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
+    default_options = "protobuf:shared=False", "protobuf:static_rt=True"
 
     def build(self):
         cmake = CMake(self)
