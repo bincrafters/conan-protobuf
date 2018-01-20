@@ -2,7 +2,7 @@
 
 | Bintray | Appveyor | Travis |
 |---------|-----------|--------|
-|BINTRAY_BADGE_URL|APPVEYOR_BADGE_URL|TRAVIS_BADGE_URL|
+|BINTRAY_BADGE_URL|[![Build status](https://ci.appveyor.com/api/projects/status/w81rpo7n109i8nic/branch/master?svg=true)](https://ci.appveyor.com/project/jgsogo/conan-protobuf/branch/master)|[![Build Status](https://travis-ci.org/jgsogo/conan-protobuf.svg?branch=master)](https://travis-ci.org/jgsogo/conan-protobuf)|
 
 ## Conan.io Information
 
