@@ -22,6 +22,10 @@ foreach(flag_var
     endif()
 endforeach()
 
+if(BUILD_SHARED_LIBS)
+    add_definitions(PROTOBUF_USE_DLLS)
+endif()
+
 # Add executable
 link_directories(${CONAN_LIB_DIRS})  # TODO: Get library with full path to avoid this command.
 add_executable(${PROJECT_NAME} test_package.cpp ${PROTO_SRCS} ${PROTO_HDRS})

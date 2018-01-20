@@ -46,6 +46,7 @@ class ProtobufConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["protobuf_BUILD_TESTS"] = self.options.build_tests
         cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = self.options.static_rt
+        cmake.definitions["protobuf_BUILD_SHARED_LIBS"] = self.options.shared
         cmake.configure(build_folder=self.build_subfolder)
         cmake.build()
         if self.options.build_tests:
