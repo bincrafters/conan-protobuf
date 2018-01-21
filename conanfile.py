@@ -22,10 +22,11 @@ class ProtobufConan(ConanFile):
 
     # Options may need to change depending on the packaged library.
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "with_zlib": [True, False],
+    options = {"with_zlib": [True, False],
                "build_tests": [True, False],
-               "static_rt": [True, False],}
+               "static_rt": [True, False],
+               # "shared": [True, False],  # Watch: https://github.com/google/protobuf/issues/2502
+               }
     default_options = "shared=False","with_zlib=False","build_tests=False","static_rt=True",
     
     # Custom attributes for Bincrafters recipe conventions
