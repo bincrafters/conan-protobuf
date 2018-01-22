@@ -8,6 +8,7 @@ int main()
 	std::cout << "Bincrafters\n";
 
 	tutorial::Person p;
+	p.set_id(21);
 	p.set_name("Bincrafters");
 	p.set_email("bincrafters@github.com");
 

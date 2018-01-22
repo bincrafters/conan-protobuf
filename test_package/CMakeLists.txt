@@ -4,30 +4,40 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-find_package(protobuf REQUIRED)
-find_program(Protobuf_PROTOC_EXECUTABLE
-    NAMES protoc
-    DOC "The Google Protocol Buffers Compiler"
-    PATHS
-    ${CONAN_BIN_DIRS_PROTOBUF})
-mark_as_advanced(Protobuf_PROTOC_EXECUTABLE)
-PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS addressbook.proto)
+find_package(protobuf CONFIG REQUIRED)
+message(STATUS "Using Protocol Buffers ${protobuf_VERSION}")
+set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 
-# Static runtime
-foreach(flag_var
-        CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-        CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+# http://www.cmake.org/Wiki/CMake_FAQ#How_can_I_build_my_MSVC_application_with_a_static_runtime.3F
+if(MSVC AND protobuf_MSVC_STATIC_RUNTIME)
+  foreach(flag_var
+      CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+      CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
     if(${flag_var} MATCHES "/MD")
-        string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
-    endif()
-endforeach()
+      string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
+    endif(${flag_var} MATCHES "/MD")
+  endforeach()
+endif()
+
+set(TEST_SRCS test_package.cpp)
+set(TEST_PROTOS addressbook.proto)
+
+#Code Generation
+if(protobuf_MODULE_COMPATIBLE) #Legacy Support
+    protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${TEST_PROTOS})
+    list(APPEND TEST_SRCS ${PROTO_SRCS} ${PROTO_HDRS})
+endif()
 
 if(BUILD_SHARED_LIBS)
     add_definitions(PROTOBUF_USE_DLLS)
 endif()
 
-# Add executable
-link_directories(${CONAN_LIB_DIRS})  # TODO: Get library with full path to avoid this command.
-add_executable(${PROJECT_NAME} test_package.cpp ${PROTO_SRCS} ${PROTO_HDRS})
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})  # TODO: target dir for .pb.h files.
+#Executable setup
+add_executable(${PROJECT_NAME} ${TEST_SRCS} ${TEST_PROTOS})
+if(protobuf_MODULE_COMPATIBLE) #Legacy mode
+    target_include_directories(${PROJECT_NAME} PUBLIC ${PROTOBUF_INCLUDE_DIRS})
+    target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
+else()
+    target_link_libraries(${PROJECT_NAME} protobuf::libprotobuf)
+    protobuf_generate(TARGET ${PROJECT_NAME})
+endif()

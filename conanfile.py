@@ -24,10 +24,11 @@ class ProtobufConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"with_zlib": [True, False],
                "build_tests": [True, False],
+               "build_binaries": [True, False],
                "static_rt": [True, False],
                # "shared": [True, False],  # Watch: https://github.com/google/protobuf/issues/2502
                }
-    default_options = "with_zlib=False","build_tests=False","static_rt=True",
+    default_options = "with_zlib=False","build_tests=False","static_rt=True","build_binaries=True"
     
     # Custom attributes for Bincrafters recipe conventions
     source_subfolder = "source_subfolder"
@@ -46,8 +47,10 @@ class ProtobufConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.definitions["protobuf_BUILD_TESTS"] = self.options.build_tests
+        cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = self.options.build_binaries
         cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = self.options.static_rt
-        # TODO: option 'shared' not enabled  cmake.definitions["protobuf_BUILD_SHARED_LIBS"] = self.options.shared  
+        cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
+        # TODO: option 'shared' not enabled  cmake.definitions["protobuf_BUILD_SHARED_LIBS"] = self.options.shared
         cmake.configure(build_folder=self.build_subfolder)
         cmake.build()
         if self.options.build_tests:
@@ -55,5 +58,5 @@ class ProtobufConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["libprotobuf",]  # "protobuf-lite" too, but they are incompatible.
+        self.cpp_info.libs = tools.collect_libs(self)
 
