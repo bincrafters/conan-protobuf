@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanException
 import os
 
 
@@ -10,39 +11,40 @@ class ProtobufConan(ConanFile):
     version = "3.5.1"
     url = "https://github.com/bincrafters/conan-protobuf"
     description = "Conan.io recipe for Google Protocol Buffers"
-
-    # Indicates License type of the packaged library
     license = "MIT"
-
-    # Packages the license for the conanfile.py
     exports = ["LICENSE.md"]
-
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
-
-    # Options may need to change depending on the packaged library.
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"with_zlib": [True, False],
-               "build_tests": [True, False],
-               "build_binaries": [True, False],
-               "static_rt": [True, False],
-               # "shared": [True, False],  # Watch: https://github.com/google/protobuf/issues/2502
-               }
-    default_options = "with_zlib=False", "build_tests=False", "static_rt=True", "build_binaries=True"
-    
-    # Custom attributes for Bincrafters recipe conventions
     source_subfolder = "source_subfolder"
     build_subfolder = "build_subfolder"
-
+    settings = "os", "arch", "compiler", "build_type"
+    short_paths=True
+    options = { "shared": [True, False],  
+        "with_zlib": [True, False],
+        "build_tests": [True, False],
+        "build_binaries": [True, False],
+        "static_rt": [True, False],
+    }
+    default_options = "with_zlib=False", "build_tests=False", "static_rt=True", "build_binaries=True"
+    
+    def configure(self):
+        # Todo: re-enable shared builds when issue resolved
+        if self.options.shared == True:
+            raise ConanException("Shared builds not currently supported, see github issue: https://github.com/google/protobuf/issues/2502")
+    
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11@conan/stable")  # TODO: Make a range
+            self.requires("zlib/[>=1.2.11]@conan/stable")
         if self.options.build_tests:
-            self.requires("gtest/1.7.0@bincrafters/stable")  # TODO: Make a range
+            self.requires("gtest/[>=1.7.0]@bincrafters/stable")
 
     def source(self):
-        repo_url = "https://github.com/google/protobuf.git"
-        self.run("git clone -b v{0} {1} {2}".format(self.version, repo_url, self.source_subfolder))
+        source_url = "https://github.com/google/protobuf"
+        tools.get("{0}/archive/v{1}.tar.gz".format(source_url, self.version))
+        extracted_dir = self.name + "-" + self.version
+
+        #Rename to "source_subfolder" is a convention to simplify later steps
+        os.rename(extracted_dir, self.source_subfolder)
 
     def build(self):
         cmake = CMake(self)
