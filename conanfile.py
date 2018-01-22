@@ -25,7 +25,10 @@ class ProtobufConan(ConanFile):
         "build_binaries": [True, False],
         "static_rt": [True, False],
     }
-    default_options = "with_zlib=False", "build_tests=False", "static_rt=True", "build_binaries=True"
+    default_options = (
+        "with_zlib=False", "build_tests=False", 
+        "static_rt=True", "build_binaries=True", 
+        "shared=False")
     
     def configure(self):
         # Todo: re-enable shared builds when issue resolved
