@@ -28,7 +28,7 @@ class ProtobufConan(ConanFile):
                "static_rt": [True, False],
                # "shared": [True, False],  # Watch: https://github.com/google/protobuf/issues/2502
                }
-    default_options = "with_zlib=False","build_tests=False","static_rt=True","build_binaries=True"
+    default_options = "with_zlib=False", "build_tests=False", "static_rt=True", "build_binaries=True"
     
     # Custom attributes for Bincrafters recipe conventions
     source_subfolder = "source_subfolder"
