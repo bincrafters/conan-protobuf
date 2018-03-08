@@ -24,11 +24,12 @@ class ProtobufConan(ConanFile):
         "build_tests": [True, False],
         "build_binaries": [True, False],
         "static_rt": [True, False],
+        "fpic": [True, False],
     }
     default_options = (
         "with_zlib=False", "build_tests=False", 
         "static_rt=True", "build_binaries=True", 
-        "shared=False")
+        "shared=False", "fpic=False")
     
     def configure(self):
         # Todo: re-enable shared builds when issue resolved
@@ -55,6 +56,7 @@ class ProtobufConan(ConanFile):
         cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = self.options.build_binaries
         cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = self.options.static_rt
         cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
+        cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = "ON" if self.options.fpic else "OFF"
         # TODO: option 'shared' not enabled  cmake.definitions["protobuf_BUILD_SHARED_LIBS"] = self.options.shared
         cmake.configure(build_folder=self.build_subfolder)
         cmake.build()
