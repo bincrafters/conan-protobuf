@@ -20,7 +20,7 @@ class ProtobufConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     short_paths=True
     options = {
-        "shared": [True, False],  
+        "shared": [True, False],
         "with_zlib": [True, False],
         "build_tests": [True, False],
         "build_binaries": [True, False],
@@ -28,17 +28,17 @@ class ProtobufConan(ConanFile):
         "fPIC": [True, False],
     }
     default_options = (
-        "with_zlib=False", "build_tests=False", 
-        "static_rt=True", "build_binaries=True", 
+        "with_zlib=False", "build_tests=False",
+        "static_rt=True", "build_binaries=True",
         "shared=False", "fPIC=True")
-    
+
     def configure(self):
         # Todo: re-enable shared builds when issue resolved
         if self.options.shared == True:
             raise ConanException("Shared builds not currently supported, see github issue: https://github.com/google/protobuf/issues/2502")
         if self.settings.compiler == 'Visual Studio':
             del self.options.fPIC
-    
+
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11]@conan/stable")
@@ -55,6 +55,7 @@ class ProtobufConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["CMAKE_INSTALL_LIBDIR"] = "lib"
         cmake.definitions["protobuf_BUILD_TESTS"] = self.options.build_tests
         cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = self.options.build_binaries
         cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = self.options.static_rt
