@@ -8,13 +8,12 @@ import os
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
-    default_options = "protobuf:static_rt=True"
 
     def build(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_SHARED_LIBS"] = False
-        cmake.configure()
-        cmake.build()
+        with tools.environment_append(RunEnvironment(self).vars):
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
 
     def test(self):
         with tools.environment_append(RunEnvironment(self).vars):
