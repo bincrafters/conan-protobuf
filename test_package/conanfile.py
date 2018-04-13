@@ -9,6 +9,9 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
+    def imports(self):
+        self.copy(pattern="*.dylib", dst="bin", src="lib")
+
     def build(self):
         with tools.environment_append(RunEnvironment(self).vars):
             cmake = CMake(self)
