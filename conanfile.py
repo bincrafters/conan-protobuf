@@ -7,7 +7,7 @@ import os
 
 class ProtobufConan(ConanFile):
     name = "protobuf"
-    version = "3.5.2"
+    version = "3.6.0"
     url = "https://github.com/bincrafters/conan-protobuf"
     homepage = "https://github.com/google/protobuf"
     author = "Bincrafters <bincrafters@gmail.com>"
@@ -59,7 +59,7 @@ class ProtobufConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self.build_subfolder)
+        self.copy("LICENSE", dst="licenses", src=self.source_subfolder)
         cmake = self.configure_cmake()
         cmake.install()
         if self.settings.os == "Macos" and self.options.shared:
