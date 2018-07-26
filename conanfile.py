@@ -59,7 +59,7 @@ class ProtobufConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self.build_subfolder)
+        self.copy("LICENSE", dst="licenses", src=self.source_subfolder)
         cmake = self.configure_cmake()
         cmake.install()
         if self.settings.os == "Macos" and self.options.shared:
