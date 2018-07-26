@@ -9,7 +9,7 @@ class ProtobufConan(ConanFile):
     name = "protobuf"
     version = "3.5.2"
     url = "https://github.com/bincrafters/conan-protobuf"
-    homepage = "https://developers.google.com/protocol-buffers/"
+    homepage = "https://github.com/google/protobuf"
     author = "Bincrafters <bincrafters@gmail.com>"
     description = "Protocol Buffers - Google's data interchange format"
     license = "BSD"
@@ -19,7 +19,7 @@ class ProtobufConan(ConanFile):
     source_subfolder = "source_subfolder"
     build_subfolder = "build_subfolder"
     settings = "os", "arch", "compiler", "build_type"
-    short_paths=True
+    short_paths = True
     options = {
         "shared": [True, False],
         "with_zlib": [True, False],
@@ -27,7 +27,9 @@ class ProtobufConan(ConanFile):
     }
     default_options = (
         "with_zlib=False",
-        "shared=False", "fPIC=True")
+        "shared=False",
+        "fPIC=True"
+    )
 
     def configure(self):
         if self.settings.compiler == 'Visual Studio':
@@ -38,8 +40,7 @@ class ProtobufConan(ConanFile):
             self.requires("zlib/1.2.11@conan/stable")
 
     def source(self):
-        source_url = "https://github.com/google/protobuf"
-        tools.get("{0}/archive/v{1}.tar.gz".format(source_url, self.version))
+        tools.get("{0}/archive/v{1}.tar.gz".format(self.homepage, self.version))
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self.source_subfolder)
 
@@ -48,9 +49,7 @@ class ProtobufConan(ConanFile):
         cmake.definitions["CMAKE_INSTALL_LIBDIR"] = "lib"
         cmake.definitions["protobuf_BUILD_TESTS"] = False
         cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
-        if self.settings.compiler != 'Visual Studio':
-            cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.fPIC
-        else:
+        if self.settings.compiler == 'Visual Studio':
             cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime
         cmake.configure(build_folder=self.build_subfolder)
         return cmake
