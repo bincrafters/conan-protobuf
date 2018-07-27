@@ -32,6 +32,10 @@ class ProtobufConan(ConanFile):
     )
 
     def configure(self):
+        if self.settings.os == "Windows" and \
+                (self.settings.compiler != "Visual Studio" or int(str(self.settings.compiler.version)) < 14):
+            raise tools.ConanException("On Windows, the protobuf/3.6.0 package can only be built with the Visual Studio 2015 or higher.")
+
         if self.settings.compiler == 'Visual Studio':
             del self.options.fPIC
 
