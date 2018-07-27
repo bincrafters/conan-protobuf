@@ -34,6 +34,7 @@ endif()
 
 #Executable setup
 add_executable(${PROJECT_NAME} ${TEST_SRCS} ${TEST_PROTOS})
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 if(protobuf_MODULE_COMPATIBLE) #Legacy mode
     target_include_directories(${PROJECT_NAME} PUBLIC ${PROTOBUF_INCLUDE_DIRS})
     target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
