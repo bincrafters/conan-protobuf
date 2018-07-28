@@ -33,8 +33,10 @@ class ProtobufConan(ConanFile):
 
     def configure(self):
         if self.settings.os == "Windows" and \
-                (self.settings.compiler != "Visual Studio" or int(str(self.settings.compiler.version)) < 14):
-            raise tools.ConanException("On Windows, the protobuf/3.6.0 package can only be built with the Visual Studio 2015 or higher.")
+                self.settings.compiler == "Visual Studio" and \
+                int(str(self.settings.compiler.version)) < 14:
+            raise tools.ConanException(
+                    "On Windows, the protobuf/3.6.0 package can only be built with the Visual Studio 2015 or higher.")
 
         if self.settings.compiler == 'Visual Studio':
             del self.options.fPIC
@@ -66,14 +68,6 @@ class ProtobufConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self.source_subfolder)
         cmake = self.configure_cmake()
         cmake.install()
-        if self.settings.os == "Macos" and self.options.shared:
-            protoc = os.path.join(self.package_folder, "bin", "protoc")
-            libprotoc = 'libprotocd.dylib' if self.settings.build_type == 'Debug' else 'libprotoc.dylib'
-            libprotobuf = 'libprotobufd.dylib' if self.settings.build_type == 'Debug' else 'libprotobuf.dylib'
-            for lib in [libprotoc, libprotobuf]:
-                self.run("install_name_tool -change %s @executable_path/../lib/%s %s" % (lib, lib, protoc))
-            libprotoc = os.path.join(self.package_folder, "lib", libprotoc)
-            self.run("install_name_tool -change %s @loader_path/%s %s" % (libprotobuf, libprotobuf, libprotoc))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
