@@ -4,6 +4,8 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
 find_package(protobuf CONFIG REQUIRED)
 message(STATUS "Using Protocol Buffers ${protobuf_VERSION}")
 set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
@@ -39,6 +41,6 @@ if(protobuf_MODULE_COMPATIBLE) #Legacy mode
     target_include_directories(${PROJECT_NAME} PUBLIC ${PROTOBUF_INCLUDE_DIRS})
     target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
 else()
-    target_link_libraries(${PROJECT_NAME} protobuf::libprotobuf)
+    target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
     protobuf_generate(TARGET ${PROJECT_NAME})
 endif()
