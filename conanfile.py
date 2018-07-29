@@ -35,14 +35,14 @@ class ProtobufConan(ConanFile):
         return self.settings.compiler == "clang" and self.settings.arch == "x86"
 
     def configure(self):
-        if self.settings.os == "Windows" and \
-                self.settings.compiler == "Visual Studio" and \
-                int(str(self.settings.compiler.version)) < 14:
-            raise tools.ConanException(
-                    "On Windows, the protobuf/3.6.0 package can only be built with the Visual Studio 2015 or higher.")
-
-        if self.settings.compiler == 'Visual Studio':
+        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             del self.options.fPIC
+            compiler_version = int(str(self.settings.compiler.version))
+            if compiler_version < 14:
+                raise tools.ConanException("On Windows, the protobuf/3.6.0 package can only be built with the Visual Studio 2015 or higher.")
+            elif compiler_version == 15 and self.settings.build_type == "Debug":
+                # https://github.com/google/protobuf/issues/4963
+                raise tools.ConanException("protobuf/3.6.0 could not be built with Visual Studio 15 and Debug, see issue #4963.")
 
     def requirements(self):
         if self.options.with_zlib:
