@@ -10,8 +10,10 @@ class ProtobufConan(ConanFile):
     name = "protobuf"
     version = "3.5.1"
     url = "https://github.com/bincrafters/conan-protobuf"
+    homepage = "https://github.com/google/protobuf"
+    author = "Bincrafters <bincrafters@gmail.com>"
     description = "Conan.io recipe for Google Protocol Buffers"
-    license = "MIT"
+    license = "BSD"
     exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
@@ -46,28 +48,35 @@ class ProtobufConan(ConanFile):
             self.requires("gtest/[>=1.7.0]@bincrafters/stable")
 
     def source(self):
-        source_url = "https://github.com/google/protobuf"
-        tools.get("{0}/archive/v{1}.tar.gz".format(source_url, self.version))
+        tools.get("{0}/archive/v{1}.tar.gz".format(self.homepage, self.version))
         extracted_dir = self.name + "-" + self.version
 
         #Rename to "source_subfolder" is a convention to simplify later steps
         os.rename(extracted_dir, self.source_subfolder)
 
-    def build(self):
+    def configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["CMAKE_INSTALL_LIBDIR"] = "lib"
         cmake.definitions["protobuf_BUILD_TESTS"] = self.options.build_tests
         cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = self.options.build_binaries
         cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = self.options.static_rt
         cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
-        if self.settings.compiler != 'Visual Studio':
-            cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.fPIC
         # TODO: option 'shared' not enabled  cmake.definitions["protobuf_BUILD_SHARED_LIBS"] = self.options.shared
         cmake.configure(build_folder=self.build_subfolder)
+        return cmake
+
+    def build(self):
+        cmake = self.configure_cmake()
         cmake.build()
         if self.options.build_tests:
             self.run("ctest")
+
+    def package(self):
+        self.copy(pattern="LICENSE", dst="licenses", src=self.source_subfolder)
+        cmake = self.configure_cmake()
         cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Linux":
+            self.cpp_info.libs.append("pthread")
