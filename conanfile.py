@@ -76,6 +76,20 @@ class ProtobufConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self.source_subfolder)
         cmake = self.configure_cmake()
         cmake.install()
+        if self.settings.os == "Macos" and self.options.shared:
+            protoc = os.path.join(self.package_folder, "bin", "protoc")
+            libprotoc = 'libprotocd.%s.dylib' % self.version if self.settings.build_type == 'Debug'\
+                else 'libprotoc.%s.dylib' % self.version
+            libprotobuf = 'libprotobufd.%s.dylib' % self.version if self.settings.build_type == 'Debug'\
+                else 'libprotobuf.%s.dylib' % self.version
+            for lib in [libprotoc, libprotobuf]:
+                command = "install_name_tool -change %s @executable_path/../lib/%s %s" % (lib, lib, protoc)
+                self.output.warn(command)
+                self.run(command)
+            libprotoc = os.path.join(self.package_folder, "lib", libprotoc)
+            command = "install_name_tool -change %s @loader_path/%s %s" % (libprotobuf, libprotobuf, libprotoc)
+            self.output.warn(command)
+            self.run(command)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
