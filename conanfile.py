@@ -8,7 +8,7 @@ import glob
 
 class ProtobufConan(ConanFile):
     name = "protobuf"
-    version = "3.6.0"
+    version = "3.6.1"
     url = "https://github.com/bincrafters/conan-protobuf"
     homepage = "https://github.com/google/protobuf"
     author = "Bincrafters <bincrafters@gmail.com>"
