@@ -3,7 +3,6 @@
 
 from conans import ConanFile, CMake, tools
 import os
-import glob
 
 
 class ProtobufConan(ConanFile):
@@ -40,7 +39,7 @@ class ProtobufConan(ConanFile):
             del self.options.fPIC
             compiler_version = int(str(self.settings.compiler.version))
             if compiler_version < 14:
-                raise tools.ConanException("On Windows, the protobuf/3.6.0 package can only be built with the Visual Studio 2015 or higher.")
+                raise tools.ConanException("On Windows, the protobuf/3.6.x package can only be built with the Visual Studio 2015 or higher.")
 
     def requirements(self):
         if self.options.with_zlib:
@@ -76,28 +75,16 @@ class ProtobufConan(ConanFile):
         cmake.install()
         if self.settings.os == "Macos" and self.options.shared:
             protoc = os.path.join(self.package_folder, "bin", "protoc")
-            with tools.chdir(os.path.join(self.package_folder, 'lib')):
-                for l in glob.glob("*.dylib"):
-                    command = 'otool -L %s' % l
-                    self.output.warn(command)
-                    self.run(command)
             libprotoc = 'libprotocd.%s.dylib' % self.version if self.settings.build_type == 'Debug'\
                 else 'libprotoc.%s.dylib' % self.version
             libprotobuf = 'libprotobufd.%s.dylib' % self.version if self.settings.build_type == 'Debug'\
                 else 'libprotobuf.%s.dylib' % self.version
             for lib in [libprotoc, libprotobuf]:
                 command = "install_name_tool -change %s @executable_path/../lib/%s %s" % (lib, lib, protoc)
-                self.output.warn(command)
                 self.run(command)
             libprotoc = os.path.join(self.package_folder, "lib", libprotoc)
             command = "install_name_tool -change %s @loader_path/%s %s" % (libprotobuf, libprotobuf, libprotoc)
-            self.output.warn(command)
             self.run(command)
-            with tools.chdir(os.path.join(self.package_folder, 'lib')):
-                for l in glob.glob("*.dylib"):
-                    command = 'otool -L %s' % l
-                    self.output.warn(command)
-                    self.run(command)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
