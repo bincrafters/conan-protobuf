@@ -3,7 +3,6 @@
 
 from conans import ConanFile, CMake, tools
 import os
-import glob
 
 
 class ProtobufConan(ConanFile):
@@ -76,10 +75,6 @@ class ProtobufConan(ConanFile):
         cmake.install()
         if self.settings.os == "Macos" and self.options.shared:
             protoc = os.path.join(self.package_folder, "bin", "protoc")
-            with tools.chdir(os.path.join(self.package_folder, 'lib')):
-                for l in glob.glob("*.dylib"):
-                    command = 'otool -L %s' % l
-                    self.run(command)
             libprotoc = 'libprotocd.%s.dylib' % self.version if self.settings.build_type == 'Debug'\
                 else 'libprotoc.%s.dylib' % self.version
             libprotobuf = 'libprotobufd.%s.dylib' % self.version if self.settings.build_type == 'Debug'\
@@ -90,10 +85,6 @@ class ProtobufConan(ConanFile):
             libprotoc = os.path.join(self.package_folder, "lib", libprotoc)
             command = "install_name_tool -change %s @loader_path/%s %s" % (libprotobuf, libprotobuf, libprotoc)
             self.run(command)
-            with tools.chdir(os.path.join(self.package_folder, 'lib')):
-                for l in glob.glob("*.dylib"):
-                    command = 'otool -L %s' % l
-                    self.run(command)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
