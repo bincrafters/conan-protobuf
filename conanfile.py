@@ -10,7 +10,7 @@ class ProtobufConan(ConanFile):
     name = "protobuf"
     version = "3.5.1"
     url = "https://github.com/bincrafters/conan-protobuf"
-    homepage = "https://github.com/google/protobuf"
+    homepage = "https://github.com/protocolbuffers/protobuf"
     author = "Bincrafters <bincrafters@gmail.com>"
     description = "Conan.io recipe for Google Protocol Buffers"
     license = "BSD"
