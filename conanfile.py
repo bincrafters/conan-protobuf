@@ -92,3 +92,7 @@ class ProtobufConan(ConanFile):
             self.cpp_info.libs.append("pthread")
             if self._is_clang_x86():
                 self.cpp_info.libs.append("atomic")
+
+        if self.settings.os == "Windows":
+            if self.options.shared:
+                self.cpp_info.defines = ["PROTOBUF_USE_DLLS"]
