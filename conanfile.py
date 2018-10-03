@@ -31,6 +31,10 @@ class ProtobufConan(ConanFile):
         "fPIC=True"
     )
 
+    @property
+    def is_clang_x86(self):
+        return self.settings.compiler == "clang" and self.settings.arch == "x86"
+
     def configure(self):
         if self.settings.compiler == 'Visual Studio':
             del self.options.fPIC
@@ -75,3 +79,4 @@ class ProtobufConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("pthread")
+
