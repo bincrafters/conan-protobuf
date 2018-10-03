@@ -31,7 +31,8 @@ class ProtobufConan(ConanFile):
         "fPIC=True"
     )
 
-    def _is_clang_x86(self):
+    @property
+    def is_clang_x86(self):
         return self.settings.compiler == "clang" and self.settings.arch == "x86"
 
     def configure(self):
@@ -61,7 +62,7 @@ class ProtobufConan(ConanFile):
         return cmake
 
     def build(self):
-        if self._is_clang_x86():
+        if self.is_clang_x86:
             cmake_file = os.path.join(self.source_subfolder, "cmake", "protoc.cmake")
             source = "target_link_libraries(protoc libprotobuf libprotoc)"
             target = "target_link_libraries(protoc libprotobuf libprotoc atomic)"
@@ -90,7 +91,7 @@ class ProtobufConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("pthread")
-            if self._is_clang_x86():
+            if self.is_clang_x86:
                 self.cpp_info.libs.append("atomic")
 
         if self.settings.os == "Windows":
