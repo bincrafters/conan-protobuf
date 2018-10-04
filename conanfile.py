@@ -67,6 +67,12 @@ class ProtobufConan(ConanFile):
             source = "target_link_libraries(protoc libprotobuf libprotoc)"
             target = "target_link_libraries(protoc libprotobuf libprotoc atomic)"
             tools.replace_in_file(cmake_file, source, target)
+        if "arm" in str(self.settings.arch):
+            cmake_file = os.path.join(self.source_subfolder, "cmake", "libprotobuf.cmake")
+            source = "target_link_libraries(libprotobuf ${CMAKE_THREAD_LIBS_INIT})"
+            target = "target_link_libraries(libprotobuf ${CMAKE_THREAD_LIBS_INIT} atomic)"
+            tools.replace_in_file(cmake_file, source, target)
+
         cmake = self.configure_cmake()
         cmake.build()
 
@@ -91,7 +97,7 @@ class ProtobufConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("pthread")
-            if self.is_clang_x86:
+            if self.is_clang_x86 or "arm" in str(self.settings.arch):
                 self.cpp_info.libs.append("atomic")
 
         if self.settings.os == "Windows":
