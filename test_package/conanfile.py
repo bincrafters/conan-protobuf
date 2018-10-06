@@ -9,10 +9,9 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
-
     def build(self):
         with tools.environment_append(RunEnvironment(self).vars):
-            cmake = CMake(self)
+            cmake = CMake(self, set_cmake_flags=True)
             cmake.configure()
             cmake.build()
 
