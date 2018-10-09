@@ -42,6 +42,7 @@ class ProtobufConan(ConanFile):
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11@conan/stable")
+        self.requires('protoc_installer/3.5.2@bincrafters/stable')
 
     def source(self):
         tools.get("{0}/archive/v{1}.tar.gz".format(self.homepage, self.version))
@@ -85,6 +86,27 @@ class ProtobufConan(ConanFile):
                 self.run("install_name_tool -change %s @executable_path/../lib/%s %s" % (lib, lib, protoc))
             libprotoc = os.path.join(self.package_folder, "lib", libprotoc)
             self.run("install_name_tool -change %s @loader_path/%s %s" % (libprotobuf, libprotobuf, libprotoc))
+
+        # quirks to use protoc from protoc installer
+        targets = os.path.join(self.package_folder, "lib", "cmake", "protobuf",
+                               "protobuf-targets-%s.cmake" % str(self.settings.build_type).lower())
+        build_type_upper = str(self.settings.build_type).upper()
+        tools.replace_in_file(targets,
+                              'IMPORTED_LOCATION_%s "${_IMPORT_PREFIX}/bin/protoc"' % build_type_upper,
+                              'IMPORTED_LOCATION_%s "${PROTOC_BINARY}"' % build_type_upper)
+        tools.replace_in_file(targets,
+                              'set_property(TARGET protobuf::protoc APPEND PROPERTY IMPORTED_CONFIGURATIONS %s)' % build_type_upper,
+                              'find_program(PROTOC_BINARY protoc)\n'
+                              'message(STATUS "PROTOC_BINARY ${PROTOC_BINARY}")\n'
+                              'if(NOT PROTOC_BINARY)\n'
+                              '    set(PROTOC_BINARY ${_IMPORT_PREFIX}/bin/protoc)\n'
+                              'endif()\n'
+                              'set_property(TARGET protobuf::protoc APPEND PROPERTY IMPORTED_CONFIGURATIONS %s)' % build_type_upper)
+        tools.replace_in_file(targets,
+                              'list(APPEND _IMPORT_CHECK_FILES_FOR_protobuf::protoc "${_IMPORT_PREFIX}/bin/protoc" )',
+                              'list(APPEND _IMPORT_CHECK_FILES_FOR_protobuf::protoc "${PROTOC_BINARY}" )')
+
+        os.unlink(os.path.join(self.package_folder, 'bin', 'protoc'))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
