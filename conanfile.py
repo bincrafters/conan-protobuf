@@ -9,7 +9,7 @@ class ProtobufConan(ConanFile):
     name = "protobuf"
     version = "3.5.2"
     url = "https://github.com/bincrafters/conan-protobuf"
-    homepage = "https://github.com/google/protobuf"
+    homepage = "https://github.com/protocolbuffers/protobuf"
     author = "Bincrafters <bincrafters@gmail.com>"
     description = "Protocol Buffers - Google's data interchange format"
     license = "BSD"
@@ -122,3 +122,7 @@ class ProtobufConan(ConanFile):
 
             if self.is_clang_x86 or "arm" in str(self.settings.arch):
                 self.cpp_info.libs.append("atomic")
+
+        if self.settings.os == "Windows":
+            if self.options.shared:
+                self.cpp_info.defines = ["PROTOBUF_USE_DLLS"]
