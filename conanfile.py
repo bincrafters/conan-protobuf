@@ -12,7 +12,7 @@ class ProtobufConan(ConanFile):
     version = "3.6.1"
     url = "https://github.com/bincrafters/conan-protobuf"
     homepage = "https://github.com/protocolbuffers/protobuf"
-    topics = ("protocol-buffers", "protocol-compiler", "serialization", "rpc")
+    topics = ("conan", "protobuf", "protocol-buffers", "protocol-compiler", "serialization", "rpc")
     author = "Bincrafters <bincrafters@gmail.com>"
     description = "Protocol Buffers - Google's data interchange format"
     license = "BSD-3-Clause"
