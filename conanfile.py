@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanException
 import os
+from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class ProtobufConan(ConanFile):
@@ -13,67 +13,53 @@ class ProtobufConan(ConanFile):
     homepage = "https://github.com/protocolbuffers/protobuf"
     author = "Bincrafters <bincrafters@gmail.com>"
     description = "Conan.io recipe for Google Protocol Buffers"
-    license = "BSD"
+    topics = ("protocol-buffers", "protocol-compiler", "serialization", "rpc")
+    license = "BSD-3-Clause"
     exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
-    source_subfolder = "source_subfolder"
-    build_subfolder = "build_subfolder"
     settings = "os", "arch", "compiler", "build_type"
-    short_paths=True
-    options = {
-        "shared": [True, False],
-        "with_zlib": [True, False],
-        "build_tests": [True, False],
-        "build_binaries": [True, False],
-        "static_rt": [True, False],
-        "fPIC": [True, False],
-    }
-    default_options = (
-        "with_zlib=False", "build_tests=False",
-        "static_rt=True", "build_binaries=True",
-        "shared=False", "fPIC=True")
+    short_paths = True
+    options = {"with_zlib": [True, False], "build_tests": [True, False],
+               "build_binaries": [True, False], "static_rt": [True, False], "fPIC": [True, False]}
+    default_options = {"with_zlib": False, "build_tests": False, "static_rt": True,
+                       "build_binaries": True, "fPIC": True}
+    _source_subfolder = "source_subfolder"
+    _build_subfolder = "build_subfolder"
 
     def configure(self):
-        # Todo: re-enable shared builds when issue resolved
-        if self.options.shared == True:
-            raise ConanException("Shared builds not currently supported, see github issue: https://github.com/google/protobuf/issues/2502")
-        if self.settings.compiler == 'Visual Studio':
+        if self.settings.compiler == "Visual Studio":
             del self.options.fPIC
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/[>=1.2.11]@conan/stable")
+            self.requires("zlib/1.2.11@conan/stable")
         if self.options.build_tests:
-            self.requires("gtest/[>=1.7.0]@bincrafters/stable")
+            self.requires("gtest/1.8.1@bincrafters/stable")
 
     def source(self):
         tools.get("{0}/archive/v{1}.tar.gz".format(self.homepage, self.version))
         extracted_dir = self.name + "-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)
 
-        #Rename to "source_subfolder" is a convention to simplify later steps
-        os.rename(extracted_dir, self.source_subfolder)
-
-    def configure_cmake(self):
+    def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["CMAKE_INSTALL_LIBDIR"] = "lib"
         cmake.definitions["protobuf_BUILD_TESTS"] = self.options.build_tests
         cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = self.options.build_binaries
         cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = self.options.static_rt
         cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
-        # TODO: option 'shared' not enabled  cmake.definitions["protobuf_BUILD_SHARED_LIBS"] = self.options.shared
-        cmake.configure(build_folder=self.build_subfolder)
+        cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
     def build(self):
-        cmake = self.configure_cmake()
+        cmake = self._configure_cmake()
         cmake.build()
         if self.options.build_tests:
             self.run("ctest")
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self.source_subfolder)
-        cmake = self.configure_cmake()
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        cmake = self._configure_cmake()
         cmake.install()
 
     def package_info(self):
