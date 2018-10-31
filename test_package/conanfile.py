@@ -12,10 +12,10 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["BUILD_SHARED_LIBS"] = False
         cmake.configure()
         cmake.build()
 
     def test(self):
         bin_path = os.path.join("bin", "test_package")
         self.run(bin_path, run_environment=True)
+        self.run("protoc --version", run_environment=True)
