@@ -32,9 +32,6 @@ class ProtobufConan(ConanFile):
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11@conan/stable")
-        if self.options.build_tests:
-            self.requires("gtest/1.8.1@bincrafters/stable")
-         self.requires("protoc_installer/3.5.1@bincrafters/stable")
 
     def source(self):
         tools.get("{0}/archive/v{1}.tar.gz".format(self.homepage, self.version))
@@ -44,7 +41,6 @@ class ProtobufConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["protobuf_BUILD_TESTS"] = False
-        cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = False
         cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = self.options.static_rt
         cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
         cmake.configure(build_folder=self._build_subfolder)
