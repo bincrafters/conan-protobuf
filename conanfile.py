@@ -20,10 +20,8 @@ class ProtobufConan(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     short_paths = True
-    options = {"with_zlib": [True, False], "build_tests": [True, False],
-               "build_binaries": [True, False], "static_rt": [True, False], "fPIC": [True, False]}
-    default_options = {"with_zlib": False, "build_tests": False, "static_rt": True,
-                       "build_binaries": True, "fPIC": True}
+    options = {"with_zlib": [True, False], "static_rt": [True, False], "fPIC": [True, False]}
+    default_options = {"with_zlib": False, "static_rt": True, "fPIC": True}
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
@@ -36,6 +34,7 @@ class ProtobufConan(ConanFile):
             self.requires("zlib/1.2.11@conan/stable")
         if self.options.build_tests:
             self.requires("gtest/1.8.1@bincrafters/stable")
+         self.requires("protoc_installer/3.5.1@bincrafters/stable")
 
     def source(self):
         tools.get("{0}/archive/v{1}.tar.gz".format(self.homepage, self.version))
@@ -44,8 +43,8 @@ class ProtobufConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["protobuf_BUILD_TESTS"] = self.options.build_tests
-        cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = self.options.build_binaries
+        cmake.definitions["protobuf_BUILD_TESTS"] = False
+        cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = False
         cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = self.options.static_rt
         cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
         cmake.configure(build_folder=self._build_subfolder)
