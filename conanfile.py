@@ -89,7 +89,3 @@ class ProtobufConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("pthread")
-
-        if self.settings.os == "Windows":
-            if self.options.shared:
-                self.cpp_info.defines = ["PROTOBUF_USE_DLLS"]
