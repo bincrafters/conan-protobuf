@@ -21,8 +21,14 @@ class ProtobufConan(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     short_paths = True
-    options = {"shared": [True, False], "with_zlib": [True, False], "fPIC": [True, False]}
-    default_options = {"with_zlib": False, "shared": False, "fPIC": True}
+    options = {"shared": [True, False],
+               "with_zlib": [True, False],
+               "fPIC": [True, False],
+               "lite": [True, False]}
+    default_options = {"with_zlib": False,
+                       "shared": False,
+                       "fPIC": True,
+                       "lite": False}
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
@@ -118,7 +124,11 @@ class ProtobufConan(ConanFile):
         os.unlink(os.path.join(self.package_folder, "bin", protoc))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        lib_prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
+        if self.options.lite:
+            self.cpp_info.libs = [lib_prefix + "protobuf-lite"]
+        else:
+            self.cpp_info.libs = [lib_prefix + "protobuf"]
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("pthread")
             if self._is_clang_x86 or "arm" in str(self.settings.arch):
