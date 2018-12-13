@@ -125,10 +125,11 @@ class ProtobufConan(ConanFile):
 
     def package_info(self):
         lib_prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
+        lib_suffix = "d" if self.settings.compiler.build_type == "Debug" else ""
         if self.options.lite:
-            self.cpp_info.libs = [lib_prefix + "protobuf-lite"]
+            self.cpp_info.libs = [lib_prefix + "protobuf-lite" + lib_suffix]
         else:
-            self.cpp_info.libs = [lib_prefix + "protobuf"]
+            self.cpp_info.libs = [lib_prefix + "protobuf" + lib_suffix]]
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("pthread")
             if self._is_clang_x86 or "arm" in str(self.settings.arch):
