@@ -6,6 +6,8 @@ conan_basic_setup()
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
+set(OPTIMIZED_FOR "SPEED" CACHE STRING "optimized_for")
+
 find_package(protobuf CONFIG REQUIRED)
 message(STATUS "Using Protocol Buffers ${protobuf_VERSION}")
 set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
@@ -20,6 +22,8 @@ if(MSVC AND protobuf_MSVC_STATIC_RUNTIME)
     endif(${flag_var} MATCHES "/MD")
   endforeach()
 endif()
+
+configure_file(addressbook.proto.in "${CMAKE_SOURCE_DIR}/addressbook.proto" @ONLY)
 
 set(TEST_SRCS test_package.cpp)
 set(TEST_PROTOS addressbook.proto)
@@ -38,13 +42,13 @@ endif()
 add_executable(${PROJECT_NAME} ${TEST_SRCS} ${TEST_PROTOS})
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 if(protobuf_MODULE_COMPATIBLE) #Legacy mode
-    target_include_directories(${PROJECT_NAME} PUBLIC ${PROTOBUF_INCLUDE_DIRS})
+    target_include_directories(${PROJECT_NAME} PRIVATE ${PROTOBUF_INCLUDE_DIRS})
     target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
 else()
     if (UNIX)
         target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
     else()
-        target_link_libraries(${PROJECT_NAME} protobuf::libprotobuf)
+        target_link_libraries(${PROJECT_NAME} CONAN_PKG::protobuf)
     endif()
     protobuf_generate(TARGET ${PROJECT_NAME})
 endif()

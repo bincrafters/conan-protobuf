@@ -12,6 +12,7 @@ class TestPackageConan(ConanFile):
     def build(self):
         with tools.environment_append(RunEnvironment(self).vars):
             cmake = CMake(self, set_cmake_flags=True)
+            cmake.definitions["OPTIMIZED_FOR"] = "LITE_RUNTIME" if self.options["protobuf"].lite else "SPEED"
             cmake.configure()
             cmake.build()
 
