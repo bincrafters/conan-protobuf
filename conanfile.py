@@ -58,6 +58,7 @@ class ProtobufConan(ConanFile):
         cmake = CMake(self, set_cmake_flags=True)
         cmake.definitions["protobuf_BUILD_TESTS"] = False
         cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
+        cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = not self.options.lite
         if self.settings.compiler == "Visual Studio":
             cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime
         cmake.configure(build_folder=self._build_subfolder)
@@ -74,6 +75,44 @@ class ProtobufConan(ConanFile):
             source = "target_link_libraries(libprotobuf ${CMAKE_THREAD_LIBS_INIT})"
             target = "target_link_libraries(libprotobuf ${CMAKE_THREAD_LIBS_INIT} atomic)"
             tools.replace_in_file(cmake_file, source, target)
+
+        if self.options.lite:
+            cmake_file = os.path.join(self._source_subfolder, "cmake", "CMakeLists.txt")
+            source = "include(libprotobuf.cmake)"
+            target = ""
+            tools.replace_in_file(cmake_file, source, target)
+
+            cmake_file = os.path.join(self._source_subfolder, "cmake", "install.cmake")
+            source = "set(_protobuf_libraries libprotobuf-lite libprotobuf)"
+            target = "set(_protobuf_libraries libprotobuf-lite)"
+            tools.replace_in_file(cmake_file, source, target)
+
+            source = "export(TARGETS libprotobuf-lite libprotobuf"
+            target = "export(TARGETS libprotobuf-lite"
+            tools.replace_in_file(cmake_file, source, target)
+        else:
+            cmake_file = os.path.join(self._source_subfolder, "cmake", "CMakeLists.txt")
+            source = "include(libprotobuf-lite.cmake)"
+            target = ""
+            tools.replace_in_file(cmake_file, source, target)
+
+            cmake_file = os.path.join(self._source_subfolder, "cmake", "install.cmake")
+            source = "set(_protobuf_libraries libprotobuf-lite libprotobuf)"
+            target = "set(_protobuf_libraries libprotobuf)"
+            tools.replace_in_file(cmake_file, source, target)
+
+            source = "export(TARGETS libprotobuf-lite libprotobuf libprotoc protoc"
+            target = "export(TARGETS libprotobuf libprotoc"
+            tools.replace_in_file(cmake_file, source, target)
+
+        cmake_file = os.path.join(self._source_subfolder, "cmake", "CMakeLists.txt")
+        tools.replace_in_file(cmake_file, "include(protoc.cmake)", "")
+
+        cmake_file = os.path.join(self._source_subfolder, "cmake", "install.cmake")
+        source = """install(TARGETS protoc EXPORT protobuf-targets
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT protoc)"""
+        target = ""
+        tools.replace_in_file(cmake_file, source, target)
 
         cmake = self._configure_cmake()
         cmake.build()
