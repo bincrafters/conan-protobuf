@@ -13,12 +13,12 @@ index 02174e9..28bb880 100644
 @@ -192,8 +193,14 @@ if (protobuf_UNICODE)
    add_definitions(-DUNICODE -D_UNICODE)
  endif (protobuf_UNICODE)
- 
+
 -include(libprotobuf-lite.cmake)
 -include(libprotobuf.cmake)
-+if (protobuf_BUILD_PROTOBUF_LITE OR protobuf_BUILD_PROTOC_BINARIES)
++if (protobuf_BUILD_PROTOBUF_LITE)
 +  include(libprotobuf-lite.cmake)
-+endif (protobuf_BUILD_PROTOBUF_LITE OR protobuf_BUILD_PROTOC_BINARIES)
++endif (protobuf_BUILD_PROTOBUF_LITE)
 +
 +if (protobuf_BUILD_PROTOC_BINARIES OR NOT protobuf_BUILD_PROTOBUF_LITE)
 +  include(libprotobuf.cmake)
@@ -34,13 +34,13 @@ index 82036cb..a82d489 100644
 @@ -5,7 +5,16 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/protobuf.pc.cmake
  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/protobuf-lite.pc.cmake
                 ${CMAKE_CURRENT_BINARY_DIR}/protobuf-lite.pc @ONLY)
- 
+
 -set(_protobuf_libraries libprotobuf-lite libprotobuf)
 +set(_protobuf_libraries)
 +
-+if (protobuf_BUILD_PROTOBUF_LITE OR protobuf_BUILD_PROTOC_BINARIES)
++if (protobuf_BUILD_PROTOBUF_LITE)
 +  list(APPEND _protobuf_libraries libprotobuf-lite)
-+endif (protobuf_BUILD_PROTOBUF_LITE OR protobuf_BUILD_PROTOC_BINARIES)
++endif (protobuf_BUILD_PROTOBUF_LITE)
 +
 +if (protobuf_BUILD_PROTOC_BINARIES OR NOT protobuf_BUILD_PROTOBUF_LITE)
 +  list(APPEND _protobuf_libraries libprotobuf)
@@ -51,7 +51,7 @@ index 82036cb..a82d489 100644
  endif (protobuf_BUILD_PROTOC_BINARIES)
 @@ -105,14 +114,13 @@ configure_file(protobuf-options.cmake
    ${CMAKE_INSTALL_CMAKEDIR}/protobuf-options.cmake @ONLY)
- 
+
  # Allows the build directory to be used as a find directory.
 -
  if (protobuf_BUILD_PROTOC_BINARIES)
@@ -73,7 +73,7 @@ index 65d05c1..fd103cd 100644
 @@ -112,6 +112,32 @@ set(libprotobuf_includes
    ${protobuf_source_dir}/src/google/protobuf/wrappers.pb.h
  )
- 
+
 +set(libprotobuf_lite_files
 +  ${protobuf_source_dir}/src/google/protobuf/arena.cc
 +  ${protobuf_source_dir}/src/google/protobuf/arenastring.cc
