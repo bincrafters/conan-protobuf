@@ -76,44 +76,6 @@ class ProtobufConan(ConanFile):
             target = "target_link_libraries(libprotobuf ${CMAKE_THREAD_LIBS_INIT} atomic)"
             tools.replace_in_file(cmake_file, source, target)
 
-        if self.options.lite:
-            cmake_file = os.path.join(self._source_subfolder, "cmake", "CMakeLists.txt")
-            source = "include(libprotobuf.cmake)"
-            target = ""
-            tools.replace_in_file(cmake_file, source, target)
-
-            cmake_file = os.path.join(self._source_subfolder, "cmake", "install.cmake")
-            source = "set(_protobuf_libraries libprotobuf-lite libprotobuf)"
-            target = "set(_protobuf_libraries libprotobuf-lite)"
-            tools.replace_in_file(cmake_file, source, target)
-
-            source = "export(TARGETS libprotobuf-lite libprotobuf"
-            target = "export(TARGETS libprotobuf-lite"
-            tools.replace_in_file(cmake_file, source, target)
-        else:
-            cmake_file = os.path.join(self._source_subfolder, "cmake", "CMakeLists.txt")
-            source = "include(libprotobuf-lite.cmake)"
-            target = ""
-            tools.replace_in_file(cmake_file, source, target)
-
-            cmake_file = os.path.join(self._source_subfolder, "cmake", "install.cmake")
-            source = "set(_protobuf_libraries libprotobuf-lite libprotobuf)"
-            target = "set(_protobuf_libraries libprotobuf)"
-            tools.replace_in_file(cmake_file, source, target)
-
-            source = "export(TARGETS libprotobuf-lite libprotobuf libprotoc protoc"
-            target = "export(TARGETS libprotobuf libprotoc"
-            tools.replace_in_file(cmake_file, source, target)
-
-        cmake_file = os.path.join(self._source_subfolder, "cmake", "CMakeLists.txt")
-        tools.replace_in_file(cmake_file, "include(protoc.cmake)", "")
-
-        cmake_file = os.path.join(self._source_subfolder, "cmake", "install.cmake")
-        source = """install(TARGETS protoc EXPORT protobuf-targets
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT protoc)"""
-        target = ""
-        tools.replace_in_file(cmake_file, source, target)
-
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -142,25 +104,25 @@ class ProtobufConan(ConanFile):
                                    "protobuf-targets-%s.cmake" % str(self.settings.build_type).lower())
         protoc = "protoc.exe" if self.settings.os == "Windows" else "protoc"
         build_type_upper = str(self.settings.build_type).upper()
-        #tools.replace_in_file(targets,
-        #                      'IMPORTED_LOCATION_%s "${_IMPORT_PREFIX}/bin/%s"' % (build_type_upper, protoc),
-        #                      'IMPORTED_LOCATION_%s "${PROTOC_BINARY}"' % build_type_upper)
-        #tools.replace_in_file(targets,
-        #                      "set_property(TARGET protobuf::protoc APPEND PROPERTY IMPORTED_CONFIGURATIONS %s)"
-        #                      % build_type_upper,
-        #                      'find_program(PROTOC_BINARY protoc)\n'
-        #                      'message(STATUS "PROTOC_BINARY ${PROTOC_BINARY}")\n'
-        #                      'if(NOT PROTOC_BINARY)\n'
-        #                      '    set(PROTOC_BINARY ${_IMPORT_PREFIX}/bin/%s)\n'
-        #                      'endif()\n'
-        #                      'set_property(TARGET protobuf::protoc APPEND PROPERTY IMPORTED_CONFIGURATIONS %s)'
-        #                      % (build_type_upper, protoc))
-        #tools.replace_in_file(targets,
-        #                      'list(APPEND _IMPORT_CHECK_FILES_FOR_protobuf::protoc "${_IMPORT_PREFIX}/bin/%s" )'
-        #                      % protoc,
-        #                      'list(APPEND _IMPORT_CHECK_FILES_FOR_protobuf::protoc "${PROTOC_BINARY}" )')
-#
-        #os.unlink(os.path.join(self.package_folder, "bin", protoc))
+        tools.replace_in_file(targets,
+                             'IMPORTED_LOCATION_%s "${_IMPORT_PREFIX}/bin/%s"' % (build_type_upper, protoc),
+                             'IMPORTED_LOCATION_%s "${PROTOC_BINARY}"' % build_type_upper)
+        tools.replace_in_file(targets,
+                             "set_property(TARGET protobuf::protoc APPEND PROPERTY IMPORTED_CONFIGURATIONS %s)"
+                             % build_type_upper,
+                             'find_program(PROTOC_BINARY protoc)\n'
+                             'message(STATUS "PROTOC_BINARY ${PROTOC_BINARY}")\n'
+                             'if(NOT PROTOC_BINARY)\n'
+                             '    set(PROTOC_BINARY ${_IMPORT_PREFIX}/bin/%s)\n'
+                             'endif()\n'
+                             'set_property(TARGET protobuf::protoc APPEND PROPERTY IMPORTED_CONFIGURATIONS %s)'
+                             % (build_type_upper, protoc))
+        tools.replace_in_file(targets,
+                             'list(APPEND _IMPORT_CHECK_FILES_FOR_protobuf::protoc "${_IMPORT_PREFIX}/bin/%s" )'
+                             % protoc,
+                             'list(APPEND _IMPORT_CHECK_FILES_FOR_protobuf::protoc "${PROTOC_BINARY}" )')
+
+        os.unlink(os.path.join(self.package_folder, "bin", protoc))
 
     def package_info(self):
         lib_prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
