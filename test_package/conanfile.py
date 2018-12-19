@@ -13,6 +13,7 @@ class TestPackageConan(ConanFile):
         with tools.environment_append(RunEnvironment(self).vars):
             cmake = CMake(self, set_cmake_flags=True)
             cmake.definitions["OPTIMIZED_FOR"] = "LITE_RUNTIME" if self.options["protobuf"].lite else "SPEED"
+            cmake.definitions["ENABLE_PROTOC"] = self.options["protobuf"].protoc
             cmake.configure()
             cmake.build()
 

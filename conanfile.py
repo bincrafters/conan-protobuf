@@ -17,18 +17,20 @@ class ProtobufConan(ConanFile):
     description = "Protocol Buffers - Google's data interchange format"
     license = "BSD-3-Clause"
     exports = ["LICENSE.md"]
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "protobuf.patch"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     short_paths = True
     options = {"shared": [True, False],
                "with_zlib": [True, False],
                "fPIC": [True, False],
-               "lite": [True, False]}
+               "lite": [True, False],
+               "protoc": [True, False]}
     default_options = {"with_zlib": False,
                        "shared": False,
                        "fPIC": True,
-                       "lite": False}
+                       "lite": False,
+                       "protoc": True}
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
@@ -47,7 +49,8 @@ class ProtobufConan(ConanFile):
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11@conan/stable")
-        self.requires("protoc_installer/3.6.1@bincrafters/stable")
+        if self.options.protoc:
+            self.requires("protoc_installer/3.6.1@bincrafters/stable")
 
     def source(self):
         tools.get("{0}/archive/v{1}.tar.gz".format(self.homepage, self.version))
@@ -58,14 +61,16 @@ class ProtobufConan(ConanFile):
         cmake = CMake(self, set_cmake_flags=True)
         cmake.definitions["protobuf_BUILD_TESTS"] = False
         cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
-        cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = not self.options.lite
+        cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = self.options.protoc
+        cmake.definitions["protobuf_BUILD_PROTOBUF_LITE"] = self.options.lite
         if self.settings.compiler == "Visual Studio":
             cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
-    def build(self):
-        if self._is_clang_x86:
+    def _patch_protobuf(self):
+        tools.patch(base_path=self._source_subfolder, patch_file="protobuf.patch")
+        if self._is_clang_x86 and self.options.protoc:
             cmake_file = os.path.join(self._source_subfolder, "cmake", "protoc.cmake")
             source = "target_link_libraries(protoc libprotobuf libprotoc)"
             target = "target_link_libraries(protoc libprotobuf libprotoc atomic)"
@@ -76,57 +81,17 @@ class ProtobufConan(ConanFile):
             target = "target_link_libraries(libprotobuf ${CMAKE_THREAD_LIBS_INIT} atomic)"
             tools.replace_in_file(cmake_file, source, target)
 
-        if self.options.lite:
-            cmake_file = os.path.join(self._source_subfolder, "cmake", "CMakeLists.txt")
-            source = "include(libprotobuf.cmake)"
-            target = ""
-            tools.replace_in_file(cmake_file, source, target)
-
-            cmake_file = os.path.join(self._source_subfolder, "cmake", "install.cmake")
-            source = "set(_protobuf_libraries libprotobuf-lite libprotobuf)"
-            target = "set(_protobuf_libraries libprotobuf-lite)"
-            tools.replace_in_file(cmake_file, source, target)
-
-            source = "export(TARGETS libprotobuf-lite libprotobuf"
-            target = "export(TARGETS libprotobuf-lite"
-            tools.replace_in_file(cmake_file, source, target)
-        else:
-            cmake_file = os.path.join(self._source_subfolder, "cmake", "CMakeLists.txt")
-            source = "include(libprotobuf-lite.cmake)"
-            target = ""
-            tools.replace_in_file(cmake_file, source, target)
-
-            cmake_file = os.path.join(self._source_subfolder, "cmake", "install.cmake")
-            source = "set(_protobuf_libraries libprotobuf-lite libprotobuf)"
-            target = "set(_protobuf_libraries libprotobuf)"
-            tools.replace_in_file(cmake_file, source, target)
-
-            source = "export(TARGETS libprotobuf-lite libprotobuf libprotoc protoc"
-            target = "export(TARGETS libprotobuf libprotoc"
-            tools.replace_in_file(cmake_file, source, target)
-
-        cmake_file = os.path.join(self._source_subfolder, "cmake", "CMakeLists.txt")
-        tools.replace_in_file(cmake_file, "include(protoc.cmake)", "")
-
-        cmake_file = os.path.join(self._source_subfolder, "cmake", "install.cmake")
-        source = """install(TARGETS protoc EXPORT protobuf-targets
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT protoc)"""
-        target = ""
-        tools.replace_in_file(cmake_file, source, target)
-
+    def build(self):
+        self._patch_protobuf()
         cmake = self._configure_cmake()
         cmake.build()
 
-    def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
+    def _quirk_protoc(self):
         if self.settings.os == "Macos" and self.options.shared:
             protoc = os.path.join(self.package_folder, "bin", "protoc")
-            libprotoc = "libprotocd.%s.dylib" % self.version if self.settings.build_type == "Debug"\
-                else "libprotoc.%s.dylib" % self.version
-            libprotobuf = "libprotobufd.%s.dylib" % self.version if self.settings.build_type == "Debug"\
-                else "libprotobuf.%s.dylib" % self.version
+            suffix = "d" if self.settings.build_type == "Debug" else ""
+            libprotoc = "libprotoc%s.%s.dylib" % (suffix, self.version)
+            libprotobuf = "libprotobuf%s.%s.dylib" % (suffix, self.version)
             for lib in [libprotoc, libprotobuf]:
                 command = "install_name_tool -change %s @executable_path/../lib/%s %s" % (lib, lib, protoc)
                 self.run(command)
@@ -134,41 +99,48 @@ class ProtobufConan(ConanFile):
             command = "install_name_tool -change %s @loader_path/%s %s" % (libprotobuf, libprotobuf, libprotoc)
             self.run(command)
 
-        # quirks to use protoc from protoc installer
-        targets = os.path.join(self.package_folder, "lib", "cmake", "protobuf",
-                               "protobuf-targets-%s.cmake" % str(self.settings.build_type).lower())
+        targets = os.path.join(self.package_folder, "lib", "cmake", "protobuf", "protobuf-targets-%s.cmake" % str(self.settings.build_type).lower())
         if not os.path.isfile(targets):
             targets = os.path.join(self.package_folder, "cmake",
-                                   "protobuf-targets-%s.cmake" % str(self.settings.build_type).lower())
+                                "protobuf-targets-%s.cmake" % str(self.settings.build_type).lower())
         protoc = "protoc.exe" if self.settings.os == "Windows" else "protoc"
         build_type_upper = str(self.settings.build_type).upper()
         tools.replace_in_file(targets,
-                             'IMPORTED_LOCATION_%s "${_IMPORT_PREFIX}/bin/%s"' % (build_type_upper, protoc),
-                             'IMPORTED_LOCATION_%s "${PROTOC_BINARY}"' % build_type_upper)
+                            'IMPORTED_LOCATION_%s "${_IMPORT_PREFIX}/bin/%s"' % (build_type_upper, protoc),
+                            'IMPORTED_LOCATION_%s "${PROTOC_BINARY}"' % build_type_upper)
         tools.replace_in_file(targets,
-                             "set_property(TARGET protobuf::protoc APPEND PROPERTY IMPORTED_CONFIGURATIONS %s)"
-                             % build_type_upper,
-                             'find_program(PROTOC_BINARY protoc)\n'
-                             'message(STATUS "PROTOC_BINARY ${PROTOC_BINARY}")\n'
-                             'if(NOT PROTOC_BINARY)\n'
-                             '    set(PROTOC_BINARY ${_IMPORT_PREFIX}/bin/%s)\n'
-                             'endif()\n'
-                             'set_property(TARGET protobuf::protoc APPEND PROPERTY IMPORTED_CONFIGURATIONS %s)'
-                             % (build_type_upper, protoc))
+                            "set_property(TARGET protobuf::protoc APPEND PROPERTY IMPORTED_CONFIGURATIONS %s)"
+                            % build_type_upper,
+                            'find_program(PROTOC_BINARY protoc)\n'
+                            'message(STATUS "PROTOC_BINARY ${PROTOC_BINARY}")\n'
+                            'if(NOT PROTOC_BINARY)\n'
+                            '    set(PROTOC_BINARY ${_IMPORT_PREFIX}/bin/%s)\n'
+                            'endif()\n'
+                            'set_property(TARGET protobuf::protoc APPEND PROPERTY IMPORTED_CONFIGURATIONS %s)'
+                            % (build_type_upper, protoc))
         tools.replace_in_file(targets,
-                             'list(APPEND _IMPORT_CHECK_FILES_FOR_protobuf::protoc "${_IMPORT_PREFIX}/bin/%s" )'
-                             % protoc,
-                             'list(APPEND _IMPORT_CHECK_FILES_FOR_protobuf::protoc "${PROTOC_BINARY}" )')
+                            'list(APPEND _IMPORT_CHECK_FILES_FOR_protobuf::protoc "${_IMPORT_PREFIX}/bin/%s" )'
+                            % protoc,
+                            'list(APPEND _IMPORT_CHECK_FILES_FOR_protobuf::protoc "${PROTOC_BINARY}" )')
 
         os.unlink(os.path.join(self.package_folder, "bin", protoc))
+
+    def package(self):
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        cmake = self._configure_cmake()
+        cmake.install()
+        if self.options.protoc:
+            self._quirk_protoc()
 
     def package_info(self):
         lib_prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
         lib_suffix = "d" if self.settings.build_type == "Debug" else ""
         if self.options.lite:
-            self.cpp_info.libs = [lib_prefix + "protobuf-lite" + lib_suffix]
+            self.cpp_info.libs = ["protobuf-lite"]
         else:
-            self.cpp_info.libs = [lib_prefix + "protobuf" + lib_suffix, lib_prefix + "protoc" + lib_suffix]
+            self.cpp_info.libs = ["protobuf"]
+        self.cpp_info.libs = [lib_prefix + lib + lib_suffix for lib in self.cpp_info.libs ]
+
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("pthread")
             if self._is_clang_x86 or "arm" in str(self.settings.arch):
