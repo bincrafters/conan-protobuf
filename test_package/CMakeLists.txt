@@ -6,7 +6,7 @@ conan_basic_setup()
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-option(ENABLE_PROTOC "Run protoc to generate sources" ON)
+set(PROTOBUF_PROTOC_EXECUTABLE ${CONAN_BIN_DIRS_PROTOC_INSTALLER}/protoc)
 set(OPTIMIZED_FOR "SPEED" CACHE STRING "optimized_for")
 
 find_package(protobuf CONFIG REQUIRED)
@@ -26,34 +26,24 @@ endif()
 
 set(TEST_SRCS test_package.cpp)
 
-if (ENABLE_PROTOC)
-    configure_file(addressbook.proto.in "${CMAKE_SOURCE_DIR}/addressbook.proto" @ONLY)
+configure_file(addressbook.proto.in "${CMAKE_SOURCE_DIR}/addressbook.proto" @ONLY)
 
-    set(TEST_PROTOS addressbook.proto)
+set(TEST_PROTOS addressbook.proto)
 
-    #Code Generation
-    if(protobuf_MODULE_COMPATIBLE) #Legacy Support
-        protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${TEST_PROTOS})
-        list(APPEND TEST_SRCS ${PROTO_SRCS} ${PROTO_HDRS})
-    endif()
+#Code Generation
+if(protobuf_MODULE_COMPATIBLE) #Legacy Support
+    protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${TEST_PROTOS})
+    list(APPEND TEST_SRCS ${PROTO_SRCS} ${PROTO_HDRS})
+endif()
 
-    if(BUILD_SHARED_LIBS)
-        add_definitions(PROTOBUF_USE_DLLS)
-    endif()
-
-    #Executable setup
-    add_executable(${PROJECT_NAME} ${TEST_SRCS} ${TEST_PROTOS})
-    if(protobuf_MODULE_COMPATIBLE) #Legacy mode
-        target_include_directories(${PROJECT_NAME} PRIVATE ${PROTOBUF_INCLUDE_DIRS})
-        target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-    else()
-        target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-        protobuf_generate(TARGET ${PROJECT_NAME})
-    endif()
-else (ENABLE_PROTOC)
-    set(TEST_PROTOS addressbook.pb.cc addressbook.pb.h)
-    add_executable(${PROJECT_NAME} ${TEST_SRCS} ${TEST_PROTOS})
+#Executable setup
+add_executable(${PROJECT_NAME} ${TEST_SRCS} ${TEST_PROTOS})
+if(protobuf_MODULE_COMPATIBLE) #Legacy mode
+    target_include_directories(${PROJECT_NAME} PRIVATE ${PROTOBUF_INCLUDE_DIRS})
     target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-    target_include_directories(${PROJECT_NAME} PRIVATE ${PROTOBUF_INCLUDE_DIRS} /home/uilian/.conan/data/protoc_installer/3.6.1/bincrafters/stable/package/44fcf6b9a7fb86b2586303e3db40189d3b511830/include)
-endif (ENABLE_PROTOC)
+else()
+    target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+    protobuf_generate(TARGET ${PROJECT_NAME})
+endif()
+
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
