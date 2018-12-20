@@ -1,5 +1,5 @@
 diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
-index 02174e9..28bb880 100644
+index 02174e9..ae9ec36 100644
 --- a/cmake/CMakeLists.txt
 +++ b/cmake/CMakeLists.txt
 @@ -28,6 +28,7 @@ endif()
@@ -13,7 +13,7 @@ index 02174e9..28bb880 100644
 @@ -192,8 +193,14 @@ if (protobuf_UNICODE)
    add_definitions(-DUNICODE -D_UNICODE)
  endif (protobuf_UNICODE)
-
+ 
 -include(libprotobuf-lite.cmake)
 -include(libprotobuf.cmake)
 +if (protobuf_BUILD_PROTOBUF_LITE)
@@ -28,13 +28,13 @@ index 02174e9..28bb880 100644
    include(libprotoc.cmake)
    include(protoc.cmake)
 diff --git a/cmake/install.cmake b/cmake/install.cmake
-index 82036cb..a82d489 100644
+index 82036cb..6542b9f 100644
 --- a/cmake/install.cmake
 +++ b/cmake/install.cmake
 @@ -5,7 +5,16 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/protobuf.pc.cmake
  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/protobuf-lite.pc.cmake
                 ${CMAKE_CURRENT_BINARY_DIR}/protobuf-lite.pc @ONLY)
-
+ 
 -set(_protobuf_libraries libprotobuf-lite libprotobuf)
 +set(_protobuf_libraries)
 +
@@ -51,7 +51,7 @@ index 82036cb..a82d489 100644
  endif (protobuf_BUILD_PROTOC_BINARIES)
 @@ -105,14 +114,13 @@ configure_file(protobuf-options.cmake
    ${CMAKE_INSTALL_CMAKEDIR}/protobuf-options.cmake @ONLY)
-
+ 
  # Allows the build directory to be used as a find directory.
 -
  if (protobuf_BUILD_PROTOC_BINARIES)
@@ -67,13 +67,13 @@ index 82036cb..a82d489 100644
      FILE ${CMAKE_INSTALL_CMAKEDIR}/protobuf-targets.cmake
    )
 diff --git a/cmake/libprotobuf.cmake b/cmake/libprotobuf.cmake
-index 65d05c1..fd103cd 100644
+index 65d05c1..c3fc7d9 100644
 --- a/cmake/libprotobuf.cmake
 +++ b/cmake/libprotobuf.cmake
-@@ -112,6 +112,32 @@ set(libprotobuf_includes
+@@ -112,9 +112,41 @@ set(libprotobuf_includes
    ${protobuf_source_dir}/src/google/protobuf/wrappers.pb.h
  )
-
+ 
 +set(libprotobuf_lite_files
 +  ${protobuf_source_dir}/src/google/protobuf/arena.cc
 +  ${protobuf_source_dir}/src/google/protobuf/arenastring.cc
@@ -102,4 +102,30 @@ index 65d05c1..fd103cd 100644
 +
  add_library(libprotobuf ${protobuf_SHARED_OR_STATIC}
    ${libprotobuf_lite_files} ${libprotobuf_files} ${libprotobuf_includes})
- target_link_libraries(libprotobuf ${CMAKE_THREAD_LIBS_INIT})
+-target_link_libraries(libprotobuf ${CMAKE_THREAD_LIBS_INIT})
++
++string(FIND "${CMAKE_LIBRARY_ARCHITECTURE}" "arm" ARM_CROSSCOMPILING)
++if (${ARM_CROSSCOMPILING} GREATER -1)
++    target_link_libraries(libprotobuf ${CMAKE_THREAD_LIBS_INIT} atomic)
++else()
++    target_link_libraries(libprotobuf ${CMAKE_THREAD_LIBS_INIT})
++endif()
+ if(protobuf_WITH_ZLIB)
+     target_link_libraries(libprotobuf ${ZLIB_LIBRARIES})
+ endif()
+diff --git a/cmake/protoc.cmake b/cmake/protoc.cmake
+index 5777b16..45c9d4f 100644
+--- a/cmake/protoc.cmake
++++ b/cmake/protoc.cmake
+@@ -3,5 +3,10 @@ set(protoc_files
+ )
+ 
+ add_executable(protoc ${protoc_files})
+-target_link_libraries(protoc libprotobuf libprotoc)
++# Clang x86 requires atomic lib
++if (${CMAKE_SIZEOF_VOID_P} EQUAL 4 AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND NOT ${CMAKE_LIBRARY_ARCHITECTURE})
++    target_link_libraries(protoc libprotobuf libprotoc atomic)
++else ()
++    target_link_libraries(protoc libprotobuf libprotoc)
++endif ()
+ add_executable(protobuf::protoc ALIAS protoc)
