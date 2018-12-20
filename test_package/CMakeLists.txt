@@ -6,9 +6,6 @@ conan_basic_setup()
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-find_package(protobuf CONFIG REQUIRED)
-message(STATUS "Using Protocol Buffers ${protobuf_VERSION}")
-
 # http://www.cmake.org/Wiki/CMake_FAQ#How_can_I_build_my_MSVC_application_with_a_static_runtime.3F
 if(MSVC AND protobuf_MSVC_STATIC_RUNTIME)
   foreach(flag_var
