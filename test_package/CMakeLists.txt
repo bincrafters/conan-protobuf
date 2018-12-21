@@ -6,10 +6,6 @@ conan_basic_setup()
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-find_package(protobuf CONFIG REQUIRED)
-message(STATUS "Using Protocol Buffers ${protobuf_VERSION}")
-set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
-
 # http://www.cmake.org/Wiki/CMake_FAQ#How_can_I_build_my_MSVC_application_with_a_static_runtime.3F
 if(MSVC AND protobuf_MSVC_STATIC_RUNTIME)
   foreach(flag_var
@@ -21,30 +17,6 @@ if(MSVC AND protobuf_MSVC_STATIC_RUNTIME)
   endforeach()
 endif()
 
-set(TEST_SRCS test_package.cpp)
-set(TEST_PROTOS addressbook.proto)
-
-#Code Generation
-if(protobuf_MODULE_COMPATIBLE) #Legacy Support
-    protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${TEST_PROTOS})
-    list(APPEND TEST_SRCS ${PROTO_SRCS} ${PROTO_HDRS})
-endif()
-
-if(BUILD_SHARED_LIBS)
-    add_definitions(PROTOBUF_USE_DLLS)
-endif()
-
-#Executable setup
-add_executable(${PROJECT_NAME} ${TEST_SRCS} ${TEST_PROTOS})
+add_executable(${PROJECT_NAME} test_package.cpp addressbook.pb.cc addressbook.pb.h)
+target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
-if(protobuf_MODULE_COMPATIBLE) #Legacy mode
-    target_include_directories(${PROJECT_NAME} PUBLIC ${PROTOBUF_INCLUDE_DIRS})
-    target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
-else()
-    if (UNIX)
-        target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-    else()
-        target_link_libraries(${PROJECT_NAME} protobuf::libprotobuf)
-    endif()
-    protobuf_generate(TARGET ${PROJECT_NAME})
-endif()
