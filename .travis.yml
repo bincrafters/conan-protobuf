@@ -71,7 +71,7 @@ script:
   - ./.ci/run.sh
 
 after_success:
-  - if [ $TRAVIS_PULL_REQUEST == false ] && [ $TRAVIS_BRANCH == "stable/3.6.1" ] && [ $CONAN_GCC_VERSIONS == 4.9 ]; then
-          chmod +x .ci/testing.sh
+  - if [ "${TRAVIS_PULL_REQUEST}" == "false" ] && [ "${TRAVIS_BRANCH}" == "stable/3.6.1" ] && [ "${CONAN_GCC_VERSIONS}" == "4.9" ]; then
+          chmod +x .ci/testing.sh &&
           ./.ci/testing.sh
       fi
