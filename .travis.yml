@@ -69,3 +69,8 @@ install:
 script:
   - chmod +x .ci/run.sh
   - ./.ci/run.sh
+
+after_success:
+  - chmod +x .ci/testing.sh
+  - ./.ci/testing.sh
+
