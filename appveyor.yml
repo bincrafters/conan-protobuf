@@ -31,3 +31,6 @@ install:
 
 test_script:
   - python build.py
+
+on_success:
+  - python .ci/testing.py
