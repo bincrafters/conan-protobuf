@@ -71,4 +71,4 @@ script:
   - ./.ci/run.sh
 
 after_success:
-  - python ./ci/testing.py
+  - python .ci/testing.py
