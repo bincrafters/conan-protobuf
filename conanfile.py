@@ -3,16 +3,13 @@
 
 import os
 from conans import ConanFile, CMake, tools
-<<<<<<< HEAD
-=======
 from conans.model.version import Version
->>>>>>> testing/3.6.1
 from conans.errors import ConanInvalidConfiguration
 
 
 class ProtobufConan(ConanFile):
     name = "protobuf"
-    version = "3.6.1"
+    version = "3.5.2"
     url = "https://github.com/bincrafters/conan-protobuf"
     homepage = "https://github.com/protocolbuffers/protobuf"
     topics = ("conan", "protobuf", "protocol-buffers", "protocol-compiler", "serialization", "rpc")
@@ -61,7 +58,6 @@ class ProtobufConan(ConanFile):
         cmake = CMake(self, set_cmake_flags=True)
         cmake.definitions["protobuf_BUILD_TESTS"] = False
         cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
-        cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = not self.options.lite
         cmake.definitions["protobuf_BUILD_PROTOBUF_LITE"] = self.options.lite
         if self.settings.compiler == "Visual Studio":
             cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime
@@ -78,43 +74,11 @@ class ProtobufConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        # quirks to use protoc from protoc installer
-        targets = os.path.join(self.package_folder, "lib", "cmake", "protobuf",
-                               "protobuf-targets-%s.cmake" % str(self.settings.build_type).lower())
-        if not os.path.isfile(targets):
-            targets = os.path.join(self.package_folder, "cmake",
-                                   "protobuf-targets-%s.cmake" % str(self.settings.build_type).lower())
-        protoc = "protoc.exe" if self.settings.os == "Windows" else "protoc"
-        build_type_upper = str(self.settings.build_type).upper()
-        tools.replace_in_file(targets,
-                              'IMPORTED_LOCATION_%s "${_IMPORT_PREFIX}/bin/%s"' % (build_type_upper, protoc),
-                              'IMPORTED_LOCATION_%s "${PROTOC_BINARY}"' % build_type_upper)
-        tools.replace_in_file(targets,
-                              "set_property(TARGET protobuf::protoc APPEND PROPERTY IMPORTED_CONFIGURATIONS %s)"
-                              % build_type_upper,
-                              'find_program(PROTOC_BINARY protoc)\n'
-                              'message(STATUS "PROTOC_BINARY ${PROTOC_BINARY}")\n'
-                              'if(NOT PROTOC_BINARY)\n'
-                              '    set(PROTOC_BINARY ${_IMPORT_PREFIX}/bin/%s)\n'
-                              'endif()\n'
-                              'set_property(TARGET protobuf::protoc APPEND PROPERTY IMPORTED_CONFIGURATIONS %s)'
-                              % (build_type_upper, protoc))
-        tools.replace_in_file(targets,
-                              'list(APPEND _IMPORT_CHECK_FILES_FOR_protobuf::protoc "${_IMPORT_PREFIX}/bin/%s" )'
-                              % protoc,
-                              'list(APPEND _IMPORT_CHECK_FILES_FOR_protobuf::protoc "${PROTOC_BINARY}" )')
-
-        os.unlink(os.path.join(self.package_folder, 'bin', protoc))
-
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
 
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("pthread")
-<<<<<<< HEAD
-
-=======
->>>>>>> testing/3.6.1
             if self._is_clang_x86 or "arm" in str(self.settings.arch):
                 self.cpp_info.libs.append("atomic")
 
