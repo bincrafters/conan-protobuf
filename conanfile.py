@@ -3,8 +3,6 @@
 
 import os
 from conans import ConanFile, CMake, tools
-from conans.model.version import Version
-from conans.errors import ConanInvalidConfiguration
 
 
 class ProtobufConan(ConanFile):
@@ -37,12 +35,8 @@ class ProtobufConan(ConanFile):
         return self.settings.compiler == "clang" and self.settings.arch == "x86"
 
     def configure(self):
-        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
+        if self.settings.os == "Windows":
             del self.options.fPIC
-            compiler_version = Version(self.settings.compiler.version.value)
-            if compiler_version < "14":
-                raise ConanInvalidConfiguration("On Windows, the protobuf/3.6.x package can only be built with the "
-                                           "Visual Studio 2015 or higher.")
 
     def requirements(self):
         if self.options.with_zlib:
