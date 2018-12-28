@@ -72,10 +72,10 @@ index 441bf55..6cc44ac 100644
    FILE ${CMAKE_INSTALL_CMAKEDIR}/protobuf-targets.cmake
  )
 diff --git a/cmake/libprotobuf.cmake b/cmake/libprotobuf.cmake
-index 72db915..4cb892e 100644
+index 72db915..132ab41 100644
 --- a/cmake/libprotobuf.cmake
 +++ b/cmake/libprotobuf.cmake
-@@ -112,9 +112,44 @@ set(libprotobuf_includes
+@@ -112,9 +112,47 @@ set(libprotobuf_includes
    ${protobuf_source_dir}/src/google/protobuf/wrappers.pb.h
  )
  
@@ -116,6 +116,9 @@ index 72db915..4cb892e 100644
 +    target_link_libraries(libprotobuf ${CMAKE_THREAD_LIBS_INIT} atomic)
 +else()
 +    target_link_libraries(libprotobuf ${CMAKE_THREAD_LIBS_INIT})
++endif()
++if (WIN32 AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
++    set_target_properties(libprotobuf PROPERTIES CXX_STANDARD 11)
 +endif()
 +
  if(protobuf_WITH_ZLIB)
