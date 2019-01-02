@@ -57,7 +57,7 @@ index 441bf55..6cc44ac 100644
 +endif (protobuf_BUILD_PROTOBUF_LITE)
 +
 +if (NOT protobuf_BUILD_PROTOBUF_LITE)
-+  list(APPEND _protobuf_libraries libprotobuf)
++  list(APPEND _protobuf_libraries libprotobuf libprotoc)
 +endif ()
 +
 +foreach(_library ${_protobuf_libraries})
