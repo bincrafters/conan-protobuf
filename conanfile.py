@@ -9,7 +9,7 @@ from conans.errors import ConanInvalidConfiguration
 
 class ProtobufConan(ConanFile):
     name = "protobuf"
-    version = "3.6.1"
+    version = "3.3.0"
     url = "https://github.com/bincrafters/conan-protobuf"
     homepage = "https://github.com/protocolbuffers/protobuf"
     topics = ("conan", "protobuf", "protocol-buffers", "protocol-compiler", "serialization", "rpc")
@@ -17,7 +17,7 @@ class ProtobufConan(ConanFile):
     description = "Protocol Buffers - Google's data interchange format"
     license = "BSD-3-Clause"
     exports = ["LICENSE.md"]
-    exports_sources = ["CMakeLists.txt", "protobuf.patch"]
+    exports_sources = ["CMakeLists.txt", "protobuf.patch", "fix-missing-include-file.patch"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     short_paths = True
@@ -65,7 +65,8 @@ class ProtobufConan(ConanFile):
         return cmake
 
     def build(self):
-        tools.patch(base_path=self._source_subfolder, patch_file="protobuf.patch")
+        #tools.patch(base_path=self._source_subfolder, patch_file="protobuf.patch")
+        tools.patch(base_path=self._source_subfolder, patch_file="fix-missing-include-file.patch")
         cmake = self._configure_cmake()
         cmake.build()
 
