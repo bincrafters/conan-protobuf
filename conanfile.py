@@ -65,7 +65,7 @@ class ProtobufConan(ConanFile):
         return cmake
 
     def build(self):
-        #tools.patch(base_path=self._source_subfolder, patch_file="protobuf.patch")
+        tools.patch(base_path=self._source_subfolder, patch_file="protobuf.patch")
         tools.patch(base_path=self._source_subfolder, patch_file="fix-missing-include-file.patch")
         cmake = self._configure_cmake()
         cmake.build()
