@@ -71,6 +71,7 @@ class ProtobufConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("*.pdb", dst="lib", src=self._build_subfolder, keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
 
