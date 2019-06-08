@@ -9,8 +9,8 @@ osx: &osx
    os: osx
    language: generic
 stages:
-  - installer
   - default  # default are all non-installer jobs
+  - installer
 matrix:
    include:
       - stage: default

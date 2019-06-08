@@ -1,26 +1,19 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-import os
-from conans import ConanFile, CMake, tools
+from conans import tools
+from conanfile_base import ConanFileBase
 from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
+import os
+import shutil
 
 
-class ProtobufConan(ConanFile):
-    name = "protobuf"
-    version = "3.6.1"
-    url = "https://github.com/bincrafters/conan-protobuf"
-    homepage = "https://github.com/protocolbuffers/protobuf"
-    topics = ("conan", "protobuf", "protocol-buffers", "protocol-compiler", "serialization", "rpc")
-    author = "Bincrafters <bincrafters@gmail.com>"
-    description = "Protocol Buffers - Google's data interchange format"
-    license = "BSD-3-Clause"
-    exports = ["LICENSE.md"]
-    exports_sources = ["CMakeLists.txt", "protobuf.patch"]
-    generators = "cmake"
+class ConanFileDefault(ConanFileBase):
+    name = ConanFileBase._base_name
+    version = ConanFileBase.version
+    exports = ConanFileBase.exports + ["conanfile_base.py"]
+
     settings = "os", "arch", "compiler", "build_type"
-    short_paths = True
     options = {"shared": [True, False],
                "with_zlib": [True, False],
                "fPIC": [True, False],
@@ -29,8 +22,6 @@ class ProtobufConan(ConanFile):
                        "shared": False,
                        "fPIC": True,
                        "lite": False}
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
 
     @property
     def _is_clang_x86(self):
@@ -48,32 +39,13 @@ class ProtobufConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11@conan/stable")
 
-    def source(self):
-        tools.get("{0}/archive/v{1}.tar.gz".format(self.homepage, self.version))
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
-    def _configure_cmake(self):
-        cmake = CMake(self, set_cmake_flags=True)
-        cmake.definitions["protobuf_BUILD_TESTS"] = False
-        cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
-        cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = not self.options.lite
-        cmake.definitions["protobuf_BUILD_PROTOBUF_LITE"] = self.options.lite
-        if self.settings.compiler == "Visual Studio":
-            cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
-
-    def build(self):
-        tools.patch(base_path=self._source_subfolder, patch_file="protobuf.patch")
-        cmake = self._configure_cmake()
-        cmake.build()
-
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        super(ConanFileDefault, self).package()
         self.copy("*.pdb", dst="lib", src=self._build_subfolder, keep_path=False)
-        cmake = self._configure_cmake()
-        cmake.install()
+
+        bindir = os.path.join(self.package_folder, "bin")
+        if os.path.isdir(bindir):
+            shutil.rmtree(bindir)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
