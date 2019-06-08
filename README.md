@@ -2,7 +2,7 @@
 
 | Bintray | Appveyor | Travis |
 |---------|-----------|--------|
-|[![Download](https://api.bintray.com/packages/bincrafters/public-conan/protobuf%3Abincrafters/images/download.svg) ](https://bintray.com/bincrafters/public-conan/protobuf%3Abincrafters/_latestVersion)|[![Build status](https://ci.appveyor.com/api/projects/status/github/bincrafters/conan-protobuf?svg=true)](https://ci.appveyor.com/project/BinCrafters/conan-protobuf)|[![Build Status](https://travis-ci.org/bincrafters/conan-protobuf.svg)](https://travis-ci.org/bincrafters/conan-protobuf)|
+|[![Download](https://api.bintray.com/packages/bincrafters/public-conan/protobuf%3Abincrafters/images/download.svg) ](https://bintray.com/bincrafters/public-conan/protobuf%3Abincrafters/_latestVersion)|[![Build status](https://ci.appveyor.com/api/projects/status/github/bincrafters/conan-protobuf?svg=true)](https://ci.appveyor.com/project/BinCrafters/conan-protobuf)|[![Build Status](https://travis-ci.com/bincrafters/conan-protobuf.svg)](https://travis-ci.com/bincrafters/conan-protobuf)|
 
 ## Conan.io Information
 
