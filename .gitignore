@@ -32,9 +32,16 @@
 __pycache__/*
 test_package/__pycache__/*
 test_package/build/*
+test_package_installer/__pycache__/*
+test_package_installer/build/*
 build/*
 *.pyc
 tmp/
 
 # IDE
 .idea/*
+.project
+.pydevproject
+.settings/*
+.ropeproject/*
+.vscode/
