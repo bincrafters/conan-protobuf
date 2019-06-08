@@ -11,7 +11,7 @@ import shutil
 class ConanFileDefault(ConanFileBase):
     name = ConanFileBase._base_name
     version = ConanFileBase.version
-    exports = ConanFileBase.exports + ["conanfile_base.py"]
+    exports = ConanFileBase.exports + ["protobuf.patch"]
 
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
