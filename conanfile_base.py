@@ -20,10 +20,6 @@ class ConanFileBase(ConanFile):
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
-    @property
-    def _is_clang_x86(self):
-        return self.settings.compiler == "clang" and self.settings.arch == "x86"
-
     def source(self):
         sha256 = "3d4e589d81b2006ca603c1ab712c9715a76227293032d05b26fca603f90b3f5b"
         tools.get("{0}/archive/v{1}.tar.gz".format(self.homepage, self.version), sha256=sha256)
