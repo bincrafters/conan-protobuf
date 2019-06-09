@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from conans import tools
+from conans import tools, CMake
 from conanfile_base import ConanFileBase
 from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
@@ -38,6 +38,22 @@ class ConanFileDefault(ConanFileBase):
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11@conan/stable")
+
+    def _configure_cmake(self):
+        cmake = CMake(self, set_cmake_flags=True)
+        cmake.definitions["protobuf_BUILD_TESTS"] = False
+        cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
+        cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = not self.options.lite
+        cmake.definitions["protobuf_BUILD_PROTOBUF_LITE"] = self.options.lite
+        if self.settings.compiler == "Visual Studio":
+            cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
+
+    def build(self):
+        tools.patch(base_path=self._source_subfolder, patch_file="protobuf.patch")
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         super(ConanFileDefault, self).package()
