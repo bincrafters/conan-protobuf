@@ -42,6 +42,9 @@ class ConanFileInstaller(ConanFileBase):
         del self.info.settings.arch
 
     def package_info(self):
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+        bindir = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.env_info.PATH.append(bindir)
+
         protoc = "protoc.exe" if self.settings.os_build == "Windows" else "protoc"
         self.env_info.PROTOC_BIN = os.path.normpath(os.path.join(self.package_folder, "bin", protoc))
