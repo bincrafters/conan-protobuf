@@ -2,4 +2,4 @@
 
 set -ex
 
-conan install protobuf/3.6.1@bincrafters/stable --build protobuf
+conan create . conanfile.py -tf test_pacakge
