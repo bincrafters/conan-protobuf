@@ -11,8 +11,8 @@ class ConanFileBase(ConanFile):
     homepage = "https://github.com/protocolbuffers/protobuf"
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "BSD-3-Clause"
-    exports = ["LICENSE.md"]
-    exports_sources = ["CMakeLists.txt", "conanfile_base.py"]
+    exports = ["LICENSE.md", "conanfile_base.py"]
+    exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     short_paths = True
 
