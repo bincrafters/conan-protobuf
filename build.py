@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
 from bincrafters import build_template_default, build_template_installer, build_shared
+from conans import tools
 import os
 
 if __name__ == "__main__":
     if "CONAN_CONANFILE" in os.environ and os.environ["CONAN_CONANFILE"] == "conanfile_installer.py":
+        docker_entry_script = ".ci/build.sh" if tools.os_info.is_linux else None
         arch = os.environ["ARCH"]
-        builder = build_template_installer.get_builder()
+        builder = build_template_installer.get_builder(docker_entry_script=docker_entry_script)
         builder.add({"os": build_shared.get_os(), "arch_build": arch, "arch": arch}, {}, {}, {})
         builder.run()
     else:
