@@ -29,8 +29,3 @@ class ConanFileBase(ConanFile):
         tools.get("{0}/archive/v{1}.tar.gz".format(self.homepage, self.version), sha256=sha256)
         extracted_dir = self._base_name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-
-    def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()

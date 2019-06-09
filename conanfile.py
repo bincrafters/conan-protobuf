@@ -56,7 +56,9 @@ class ConanFileDefault(ConanFileBase):
         cmake.build()
 
     def package(self):
-        super(ConanFileDefault, self).package()
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        cmake = self._configure_cmake()
+        cmake.install()
         self.copy("*.pdb", dst="lib", src=self._build_subfolder, keep_path=False)
 
         bindir = os.path.join(self.package_folder, "bin")

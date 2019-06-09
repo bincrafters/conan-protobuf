@@ -29,7 +29,9 @@ class ConanFileInstaller(ConanFileBase):
         cmake.build()
 
     def package(self):
-        super(ConanFileInstaller, self).package()
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        cmake = self._configure_cmake()
+        cmake.install()
 
         libdir = os.path.join(self.package_folder, "lib")
         if os.path.isdir(libdir):
