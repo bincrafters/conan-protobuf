@@ -116,6 +116,7 @@ matrix:
         env: CONAN_APPLE_CLANG_VERSIONS=9.1 CONAN_ARCHS=x86_64 ARCH=x86_64 CPT_TEST_FOLDER=test_package_installer CONAN_CONANFILE=conanfile_installer.py
 
 install:
+  - chmod +x .ci/build.sh
   - chmod +x .ci/install.sh
   - ./.ci/install.sh
 
