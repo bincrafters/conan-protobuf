@@ -9,7 +9,7 @@ build_policy = os.getenv("CONAN_BUILD_POLICY", "outdated")
 os.environ["CONAN_BUILD_POLICY"] = build_policy
 
 if __name__ == "__main__":
-    docker_entry_script = ".ci/build.sh" if tools.os_info.is_linux or tools.os_info.is_macos else None
+    docker_entry_script = ".ci/entry.sh" if tools.os_info.is_linux or tools.os_info.is_macos else None
 
     if "CONAN_CONANFILE" in os.environ and os.environ["CONAN_CONANFILE"] == "conanfile_installer.py":
         arch = os.environ["ARCH"]
