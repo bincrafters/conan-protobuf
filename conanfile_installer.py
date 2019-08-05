@@ -40,6 +40,7 @@ class ConanFileInstaller(ConanFileBase):
     def package_id(self):
         del self.info.settings.compiler
         del self.info.settings.arch
+        self.info.include_build_settings()
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
