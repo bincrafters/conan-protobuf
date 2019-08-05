@@ -4,7 +4,8 @@ from bincrafters import build_template_default, build_template_installer, build_
 from conans import tools
 import os
 
-build_policy = os.getenv("CONAN_BUILD_POLICY", "missing")
+# installer might depend on lib or vice versa. Make sure that the dependecy is available and up-to-date
+build_policy = os.getenv("CONAN_BUILD_POLICY", "outdated")
 os.environ["CONAN_BUILD_POLICY"] = build_policy
 
 if __name__ == "__main__":
