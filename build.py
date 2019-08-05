@@ -4,6 +4,9 @@ from bincrafters import build_template_default, build_template_installer, build_
 from conans import tools
 import os
 
+build_policy = os.getenv("CONAN_BUILD_POLICY", "missing")
+os.environ["CONAN_BUILD_POLICY"] = build_policy
+
 if __name__ == "__main__":
     if "CONAN_CONANFILE" in os.environ and os.environ["CONAN_CONANFILE"] == "conanfile_installer.py":
         docker_entry_script = ".ci/build.sh" if tools.os_info.is_linux else None
