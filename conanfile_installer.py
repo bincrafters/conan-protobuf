@@ -33,10 +33,6 @@ class ConanFileInstaller(ConanFileBase):
         cmake = self._configure_cmake()
         cmake.install()
 
-        libdir = os.path.join(self.package_folder, "lib")
-        if os.path.isdir(libdir):
-            shutil.rmtree(libdir)
-
     def package_id(self):
         del self.info.settings.compiler
         del self.info.settings.arch
