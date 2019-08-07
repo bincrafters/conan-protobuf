@@ -61,10 +61,6 @@ class ConanFileDefault(ConanFileBase):
         cmake.install()
         self.copy("*.pdb", dst="lib", src=self._build_subfolder, keep_path=False)
 
-        bindir = os.path.join(self.package_folder, "bin")
-        if os.path.isdir(bindir):
-            shutil.rmtree(bindir)
-
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.libs.sort(reverse=True)
