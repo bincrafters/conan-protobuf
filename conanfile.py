@@ -1,26 +1,19 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-import os
-from conans import ConanFile, CMake, tools
-from conans.model.version import Version
+from conans import tools, CMake
+from conanfile_base import ConanFileBase
+from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
+import os
+import shutil
 
 
-class ProtobufConan(ConanFile):
-    name = "protobuf"
-    version = "3.6.1"
-    url = "https://github.com/bincrafters/conan-protobuf"
-    homepage = "https://github.com/protocolbuffers/protobuf"
-    topics = ("conan", "protobuf", "protocol-buffers", "protocol-compiler", "serialization", "rpc")
-    author = "Bincrafters <bincrafters@gmail.com>"
-    description = "Protocol Buffers - Google's data interchange format"
-    license = "BSD-3-Clause"
-    exports = ["LICENSE.md"]
-    exports_sources = ["CMakeLists.txt", "protobuf.patch"]
-    generators = "cmake"
+class ConanFileDefault(ConanFileBase):
+    name = ConanFileBase._base_name
+    version = ConanFileBase.version
+    exports = ConanFileBase.exports + ["protobuf.patch"]
+
     settings = "os", "arch", "compiler", "build_type"
-    short_paths = True
     options = {"shared": [True, False],
                "with_zlib": [True, False],
                "fPIC": [True, False],
@@ -29,8 +22,6 @@ class ProtobufConan(ConanFile):
                        "shared": False,
                        "fPIC": True,
                        "lite": False}
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
 
     @property
     def _is_clang_x86(self):
@@ -47,11 +38,6 @@ class ProtobufConan(ConanFile):
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11@conan/stable")
-
-    def source(self):
-        tools.get("{0}/archive/v{1}.tar.gz".format(self.homepage, self.version))
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
         cmake = CMake(self, set_cmake_flags=True)
@@ -71,9 +57,9 @@ class ProtobufConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("*.pdb", dst="lib", src=self._build_subfolder, keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
+        self.copy("*.pdb", dst="lib", src=self._build_subfolder, keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
