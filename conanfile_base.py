@@ -16,7 +16,6 @@ class ConanFileBase(ConanFile):
     generators = "cmake"
     short_paths = True
 
-    # Custom attributes for Bincrafters recipe conventions
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
