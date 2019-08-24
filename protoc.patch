@@ -1,8 +1,18 @@
 diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
-index 71a0f37a..8a49cc93 100644
+index 71a0f37a..e834f410 100644
 --- a/cmake/CMakeLists.txt
 +++ b/cmake/CMakeLists.txt
-@@ -213,10 +213,7 @@ if (protobuf_UNICODE)
+@@ -180,7 +180,8 @@ if (MSVC)
+   configure_file(extract_includes.bat.in extract_includes.bat)
+ 
+   # Suppress linker warnings about files with no symbols defined.
+-  set(CMAKE_STATIC_LINKER_FLAGS /ignore:4221)
++  # Bincrafters: https://github.com/protocolbuffers/protobuf/issues/6098
++  set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} /ignore:4221")
+ 
+   # Configure Resource Compiler
+   enable_language(RC)
+@@ -213,10 +214,7 @@ if (protobuf_UNICODE)
    add_definitions(-DUNICODE -D_UNICODE)
  endif (protobuf_UNICODE)
  
