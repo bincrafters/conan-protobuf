@@ -4,8 +4,6 @@ from conans import tools, CMake
 from conanfile_base import ConanFileBase
 from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
-import os
-import shutil
 
 
 class ConanFileDefault(ConanFileBase):

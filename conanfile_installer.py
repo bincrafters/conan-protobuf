@@ -1,7 +1,6 @@
 from conans import CMake, tools
 from conanfile_base import ConanFileBase
 import os
-import shutil
 
 
 class ConanFileInstaller(ConanFileBase):
