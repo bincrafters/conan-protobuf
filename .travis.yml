@@ -9,10 +9,20 @@ osx: &osx
    os: osx
    language: generic
 stages:
-  - default  # default are all non-installer jobs
   - installer
+  - default  # default are all non-installer jobs
 matrix:
    include:
+      - stage: installer
+        <<: *linux
+        env: CONAN_GCC_VERSIONS=7 CONAN_DOCKER_IMAGE=conanio/gcc7-centos6-x86 CONAN_ARCHS=x86 ARCH=x86 CPT_TEST_FOLDER=test_package_installer CONAN_CONANFILE=conanfile_installer.py
+      - stage: installer
+        <<: *linux
+        env: CONAN_GCC_VERSIONS=7 CONAN_DOCKER_IMAGE=conanio/gcc7-centos6 CONAN_ARCHS=x86_64 ARCH=x86_64 CPT_TEST_FOLDER=test_package_installer CONAN_CONANFILE=conanfile_installer.py
+      - stage: installer
+        <<: *osx
+        osx_image: xcode9.4
+        env: CONAN_APPLE_CLANG_VERSIONS=9.1 CONAN_ARCHS=x86_64 ARCH=x86_64 CPT_TEST_FOLDER=test_package_installer CONAN_CONANFILE=conanfile_installer.py
       - stage: default
         <<: *linux
         env: CONAN_GCC_VERSIONS=4.8 CONAN_DOCKER_IMAGE=conanio/gcc48 CONAN_ARCHS=x86_64
@@ -104,19 +114,10 @@ matrix:
         <<: *osx
         osx_image: xcode10.2
         env: CONAN_APPLE_CLANG_VERSIONS=10.0
-      - stage: installer
-        <<: *linux
-        env: CONAN_GCC_VERSIONS=7 CONAN_DOCKER_IMAGE=conanio/gcc7-centos6-x86 CONAN_ARCHS=x86 ARCH=x86 CPT_TEST_FOLDER=test_package_installer CONAN_CONANFILE=conanfile_installer.py
-      - stage: installer
-        <<: *linux
-        env: CONAN_GCC_VERSIONS=7 CONAN_DOCKER_IMAGE=conanio/gcc7-centos6 CONAN_ARCHS=x86_64 ARCH=x86_64 CPT_TEST_FOLDER=test_package_installer CONAN_CONANFILE=conanfile_installer.py
-      - stage: installer
-        <<: *osx
-        osx_image: xcode9.4
-        env: CONAN_APPLE_CLANG_VERSIONS=9.1 CONAN_ARCHS=x86_64 ARCH=x86_64 CPT_TEST_FOLDER=test_package_installer CONAN_CONANFILE=conanfile_installer.py
 
 install:
   - chmod +x .ci/entry.sh
+  - chmod +x .ci/entry_installer.sh
   - chmod +x .ci/install.sh
   - ./.ci/install.sh
 
