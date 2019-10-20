@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from conans import tools, CMake
 from conanfile_base import ConanFileBase
 from conans.tools import Version
@@ -35,7 +33,7 @@ class ConanFileDefault(ConanFileBase):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11@conan/stable")
+            self.requires("zlib/1.2.11")
 
     def _configure_cmake(self):
         cmake = CMake(self, set_cmake_flags=True)
