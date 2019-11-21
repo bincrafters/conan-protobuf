@@ -1,3 +1,4 @@
+import os
 from conans import tools, CMake
 from conanfile_base import ConanFileBase
 from conans.tools import Version
@@ -69,3 +70,13 @@ class ConanFileDefault(ConanFileBase):
         if self.settings.os == "Windows":
             if self.options.shared:
                 self.cpp_info.defines = ["PROTOBUF_USE_DLLS"]
+
+        cmakedir = os.path.join("lib", "cmake", "protobuf")
+        self.cpp_info.builddirs = [cmakedir]
+        self.cpp_info.build_modules = [
+            os.path.join(cmakedir, "protobuf-config.cmake"),
+            os.path.join(cmakedir, "protobuf-module.cmake"),
+            os.path.join(cmakedir, "protobuf-options.cmake"),
+            os.path.join(cmakedir, "protobuf-targets.cmake"),
+            os.path.join(cmakedir, "protobuf-targets-{}.cmake".format(str(self.settings.build_type).lower()))
+        ]
