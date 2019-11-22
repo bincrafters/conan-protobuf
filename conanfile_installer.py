@@ -39,11 +39,14 @@ class ConanFileInstaller(ConanFileBase):
 
     def package_info(self):
         cmakedir = os.path.join("lib", "cmake", "protoc")
+        protoc = "protoc"
+        if self.settings.os_build == "Windows":
+            cmakedir = "cmake"
+            protoc = "protoc.exe"
+
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
-
-        protoc = "protoc.exe" if self.settings.os_build == "Windows" else "protoc"
         self.env_info.PROTOC_BIN = os.path.normpath(os.path.join(self.package_folder, "bin", protoc))
 
         self.cpp_info.builddirs = [cmakedir]
