@@ -8,7 +8,7 @@ class ConanFileInstaller(ConanFileBase):
     version = ConanFileBase.version
     exports = ConanFileBase.exports + ["protoc.patch"]
 
-    settings = "os_build", "arch_build", "compiler", "arch"
+    settings = "os_build", "arch_build", "compiler", "arch", "build_type"
 
     def requirements(self):
         self.requires.add("protobuf/{}@bincrafters/stable".format(self.version), private=True)
