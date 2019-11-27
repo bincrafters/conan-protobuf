@@ -71,7 +71,7 @@ class ConanFileDefault(ConanFileBase):
             if self.options.shared:
                 self.cpp_info.defines = ["PROTOBUF_USE_DLLS"]
 
-        cmakedir = os.path.join("lib", "cmake", "protobuf")
+        cmakedir = "cmake" if self.settings.os_build == "Windows" else os.path.join("lib", "cmake", "protobuf")
         self.cpp_info.builddirs = [cmakedir]
         self.cpp_info.build_modules = [
             os.path.join(cmakedir, "protobuf-config.cmake"),
