@@ -50,10 +50,11 @@ class ConanFileInstaller(ConanFileBase):
         self.env_info.PROTOC_BIN = os.path.normpath(os.path.join(self.package_folder, "bin", protoc))
 
         self.cpp_info.builddirs = [cmakedir]
+        targets_suffix = str(self.settings.build_type).lower() if self.settings.os_build == "Windows" else "noconfig"
         self.cpp_info.build_modules = [
             os.path.join(cmakedir, "protoc-config.cmake"),
             os.path.join(cmakedir, "protoc-module.cmake"),
             os.path.join(cmakedir, "protoc-options.cmake"),
             os.path.join(cmakedir, "protoc-targets.cmake"),
-            os.path.join(cmakedir, "protoc-targets-noconfig.cmake")
+            os.path.join(cmakedir, "protoc-targets-{}.cmake".format(targets_suffix))
         ]
