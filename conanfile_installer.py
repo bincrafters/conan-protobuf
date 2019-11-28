@@ -8,7 +8,7 @@ class ConanFileInstaller(ConanFileBase):
     version = ConanFileBase.version
     exports = ConanFileBase.exports + ["protoc.patch"]
 
-    settings = "os_build", "arch_build", "compiler", "arch", "build_type"
+    settings = "os_build", "arch_build", "compiler", "arch"
 
     def requirements(self):
         self.requires.add("protobuf/{}@bincrafters/stable".format(self.version), private=True)
@@ -38,22 +38,9 @@ class ConanFileInstaller(ConanFileBase):
         self.info.include_build_settings()
 
     def package_info(self):
-        cmakedir = os.path.join("lib", "cmake", "protoc")
-        protoc = "protoc"
-        if self.settings.os_build == "Windows":
-            cmakedir = "cmake"
-            protoc = "protoc.exe"
-
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
-        self.env_info.PROTOC_BIN = os.path.normpath(os.path.join(self.package_folder, "bin", protoc))
 
-        self.cpp_info.builddirs = [cmakedir]
-        self.cpp_info.build_modules = [
-            os.path.join(cmakedir, "protoc-config.cmake"),
-            os.path.join(cmakedir, "protoc-module.cmake"),
-            os.path.join(cmakedir, "protoc-options.cmake"),
-            os.path.join(cmakedir, "protoc-targets.cmake"),
-            os.path.join(cmakedir, "protoc-targets-{}.cmake".format(str(self.settings.build_type).lower()))
-        ]
+        protoc = "protoc.exe" if self.settings.os_build == "Windows" else "protoc"
+        self.env_info.PROTOC_BIN = os.path.normpath(os.path.join(self.package_folder, "bin", protoc))
