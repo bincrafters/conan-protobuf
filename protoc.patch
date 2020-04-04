@@ -1,18 +1,8 @@
 diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
-index 71a0f37a..e834f410 100644
+index 8e5e68073..c3de73cee 100644
 --- a/cmake/CMakeLists.txt
 +++ b/cmake/CMakeLists.txt
-@@ -180,7 +180,8 @@ if (MSVC)
-   configure_file(extract_includes.bat.in extract_includes.bat)
- 
-   # Suppress linker warnings about files with no symbols defined.
--  set(CMAKE_STATIC_LINKER_FLAGS /ignore:4221)
-+  # Bincrafters: https://github.com/protocolbuffers/protobuf/issues/6098
-+  set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} /ignore:4221")
- 
-   # Configure Resource Compiler
-   enable_language(RC)
-@@ -213,10 +214,7 @@ if (protobuf_UNICODE)
+@@ -232,10 +232,7 @@ if (protobuf_UNICODE)
    add_definitions(-DUNICODE -D_UNICODE)
  endif (protobuf_UNICODE)
  
@@ -24,7 +14,7 @@ index 71a0f37a..e834f410 100644
  endif (protobuf_BUILD_PROTOC_BINARIES)
  
 diff --git a/cmake/install.cmake b/cmake/install.cmake
-index be47c54a..9d4504cf 100644
+index be47c54a1..9d4504cf8 100644
 --- a/cmake/install.cmake
 +++ b/cmake/install.cmake
 @@ -1,35 +1,9 @@
@@ -158,7 +148,7 @@ index be47c54a..9d4504cf 100644
 -    COMPONENT protobuf-examples)
 -endif()
 diff --git a/cmake/protobuf-config.cmake.in b/cmake/protobuf-config.cmake.in
-index 29e39d88..7ef2f52d 100644
+index 29e39d88a..7ef2f52d9 100644
 --- a/cmake/protobuf-config.cmake.in
 +++ b/cmake/protobuf-config.cmake.in
 @@ -1,11 +1,11 @@
@@ -183,7 +173,7 @@ index 29e39d88..7ef2f52d 100644
 +  include("${CMAKE_CURRENT_LIST_DIR}/protoc-module.cmake")
  endif()
 diff --git a/cmake/protoc.cmake b/cmake/protoc.cmake
-index f90e525e..3ae9f334 100644
+index f90e525e8..3ae9f334a 100644
 --- a/cmake/protoc.cmake
 +++ b/cmake/protoc.cmake
 @@ -9,7 +9,7 @@ set(protoc_rc_files
@@ -195,3 +185,6 @@ index f90e525e..3ae9f334 100644
  add_executable(protobuf::protoc ALIAS protoc)
  
  set_target_properties(protoc PROPERTIES
+-- 
+2.26.0.windows.1
+
