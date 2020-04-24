@@ -13,11 +13,14 @@ class ConanFileDefault(ConanFileBase):
     options = {"shared": [True, False],
                "with_zlib": [True, False],
                "fPIC": [True, False],
-               "lite": [True, False]}
+               "lite": [True, False],
+               "build_protoc_bin": [True, False]}
     default_options = {"with_zlib": False,
                        "shared": False,
                        "fPIC": True,
-                       "lite": False}
+                       "lite": False,
+                       "build_protoc_bin" : False
+                       }
 
     @property
     def _is_clang_x86(self):
@@ -30,6 +33,9 @@ class ConanFileDefault(ConanFileBase):
             if compiler_version < "14":
                 raise ConanInvalidConfiguration("On Windows Protobuf can only be built with "
                                            "Visual Studio 2015 or higher.")
+        if self.options.build_protoc_bin == True and self.options.lite == True:
+            raise ConanInvalidConfiguration("protoc binary requires full protobuf library,"
+                " it can not be build with protobuf-lite library")
 
     def requirements(self):
         if self.options.with_zlib:
@@ -39,7 +45,7 @@ class ConanFileDefault(ConanFileBase):
         cmake = CMake(self, set_cmake_flags=True)
         cmake.definitions["protobuf_BUILD_TESTS"] = False
         cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
-        cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = not self.options.lite
+        cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = self.options.build_protoc_bin
         cmake.definitions["protobuf_BUILD_PROTOBUF_LITE"] = self.options.lite
         if self.settings.compiler == "Visual Studio":
             cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime
